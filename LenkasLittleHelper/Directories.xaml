@@ -1,0 +1,78 @@
+﻿<Window x:Class="LenkasLittleHelper.Directories"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Довідники (лікарні та лікарі)" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="35*"></ColumnDefinition>
+            <ColumnDefinition Width="65*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Row="0">
+                <Button Content="Додати заклад..." x:Name="Btn_AddHospital" Click="Btn_AddHospital_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+                <Button Content="Редагувати" x:Name="Btn_EditHospital" Click="Btn_EditHospital_Click" IsEnabled="False" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+                <Button Content="Видалити" x:Name="Btn_DeleteHospital" IsEnabled="False" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+            </StackPanel>
+            <ListView x:Name="ListHospitals" Height="Auto" Grid.Row="1" SelectionChanged="ListHospitals_SelectionChanged" ItemsSource="{Binding Hospitals}" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="BorderBrush" Value="LightGray" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View>
+                    <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік лікарень">
+
+                        <!--<GridViewColumn DisplayMemberBinding="{Binding Path=OrderNum}" Header="№ з/п" Width="Auto"/>-->
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=City}" Header="Місто"/>
+                        
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Title}" Header="Назва закладу" Width="100"/>
+                        
+                    </GridView>
+
+                </ListView.View>
+            </ListView>
+        </Grid>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Row="0">
+                <Button Content="Додати лікаря..." x:Name="Btn_Add_Doctor" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+                <Button Content="Редагувати" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+                <Button Content="Видалити" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+            </StackPanel>
+            <ListView Height="Auto" Grid.Row="1">
+                <ListView.View>
+
+                    <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік лікарів">
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=OrderNum}" Header="№ з/п" Width="Auto"/>
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=FullName}" Header="ПІП" Width="Auto"/>
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Address}" Header="Адреса" Width="Auto"/>
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=PhoneNum}" Header="Номер телефону" Width="Auto"/>
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Speciality}" Header="Спеціальність" Width="Auto"/>
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Category}" Header="Категорія" Width="Auto"/>
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Visitable}" Header="Візитуємо" Width="Auto"/>
+                    </GridView>
+
+                </ListView.View>
+            </ListView>
+        </Grid>
+    </Grid>
+</Window>
