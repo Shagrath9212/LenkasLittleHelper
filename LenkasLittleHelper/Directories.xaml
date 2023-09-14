@@ -32,9 +32,9 @@
 
                         <!--<GridViewColumn DisplayMemberBinding="{Binding Path=OrderNum}" Header="№ з/п" Width="Auto"/>-->
 
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=City}" Header="Місто"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=City}" Header="Місто" Width="150"/>
                         
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Title}" Header="Назва закладу" Width="100"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Title}" Header="Назва закладу" Width="400"/>
                         
                     </GridView>
 
@@ -51,12 +51,10 @@
                 <Button Content="Редагувати" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
                 <Button Content="Видалити" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
             </StackPanel>
-            <ListView Height="Auto" Grid.Row="1">
+            <ListView x:Name="ListDoctors" Height="Auto" Grid.Row="1">
                 <ListView.View>
 
                     <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік лікарів">
-
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=OrderNum}" Header="№ з/п" Width="Auto"/>
 
                         <GridViewColumn DisplayMemberBinding="{Binding Path=FullName}" Header="ПІП" Width="Auto"/>
 

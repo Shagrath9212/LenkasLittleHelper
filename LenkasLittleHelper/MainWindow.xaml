@@ -7,7 +7,7 @@
         Title="Lenka's little helper" Height="450" Width="800">
     <Grid>
         <StackPanel Orientation="Horizontal">
-            <Button Content="Звіти" x:Name="Btn_Reports" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
+            <Button Content="Звіти" x:Name="Btn_Reports" Click="Btn_Reports_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
             <Button Content="Довідники" x:Name="Btn_Directories" Click="Btn_Directories_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
         </StackPanel>
     </Grid>

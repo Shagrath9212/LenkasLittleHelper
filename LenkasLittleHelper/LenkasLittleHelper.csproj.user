@@ -13,6 +13,18 @@
     <Compile Update="EditHospital.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="ReportDay.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ReportEdit.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ReportHelper.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Report_CityEdit.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Directories.xaml">
@@ -22,6 +34,18 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ReportDay.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ReportEdit.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ReportHelper.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Report_CityEdit.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Navigation;
 
 namespace LenkasLittleHelper
 {
@@ -20,6 +19,12 @@ namespace LenkasLittleHelper
         {
             var directoriesPage = new Directories();
             directoriesPage.Show();
+        }
+
+        private void Btn_Reports_Click(object sender, RoutedEventArgs e)
+        {
+            var reportsPage = new ReportHelper();
+            reportsPage.Show();
         }
     }
 }
