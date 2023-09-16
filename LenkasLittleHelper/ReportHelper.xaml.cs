@@ -67,6 +67,15 @@ namespace LenkasLittleHelper
             });
         }
 
+        /// <summary>
+        /// Завантаження переліку лікарень (по днях)
+        /// </summary>
+        /// <param name="idReportDay"></param>
+        private void LoadCties(int idReportDay)
+        {
+            string sql = "";
+        }
+
         private void Btn_AddReport_Click(object sender, RoutedEventArgs e)
         {
             var addNew = new ReportEdit();
@@ -102,10 +111,46 @@ namespace LenkasLittleHelper
         }
         #endregion
 
+        #region Міста
+        private void Btn_AddCity_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
         private void ListReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var report = (Report)ListReports.SelectedItem;
+
+            if (report == null)
+            {
+                Btn_AddDate.IsEnabled = false;
+                return;
+            }
+
+            Btn_AddDate.IsEnabled = true;
+
             LoadDayReports(report.IdReport);
+        }
+
+        private void Btn_AddHospital_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ListDailyReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var day = (Models.ReportDay)ListDailyReports.SelectedItem;
+
+            if (day == null)
+            {
+                Btn_AddCity.IsEnabled = false;
+                return;
+            }
+
+            Btn_AddDate.IsEnabled = true;
+
+            LoadDayReports(day.IdReportDay);
         }
     }
 }

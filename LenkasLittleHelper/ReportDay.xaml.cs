@@ -19,7 +19,7 @@ namespace LenkasLittleHelper
 
         private void Report_Dt_Add_Click(object sender, RoutedEventArgs e)
         {
-            Dictionary<string, object?> cmdParams = new()
+            Dictionary<string, object?>? cmdParams = new()
             {
                 {"idReport",IdReport},
                 {"dt",ReportDay_Field.SelectedDate?.Ticks}

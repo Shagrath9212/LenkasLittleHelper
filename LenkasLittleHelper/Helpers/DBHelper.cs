@@ -99,9 +99,9 @@ namespace LenkasLittleHelper.Database
 
             return null;
         }
-        public static string? DoCommand(string? sql, Dictionary<string,object> cmdParams)
+        public static string? DoCommand(string? sql, Dictionary<string, object>? cmdParams)
         {
-            if (string.IsNullOrEmpty(sql))
+            if (string.IsNullOrEmpty(sql) || cmdParams == null)
             {
                 return "Порожній запит!";
             }
@@ -129,18 +129,6 @@ namespace LenkasLittleHelper.Database
 
             return null;
         }
-
-        //public static T? GetValueOrDefault<T>(this SqliteDataReader reader, int idx, T? defaultVal = default)
-        //{
-        //    if (reader[idx] is DBNull)
-        //    {
-        //        return defaultVal;
-        //    }
-
-        //    string val = reader.GetString(idx);
-
-        //    return ParseObject<T>(val);
-        //}
 
         public static T? GetValueOrDefault<T>(this SqliteDataReader reader, string column, T? defaultVal = default)
         {

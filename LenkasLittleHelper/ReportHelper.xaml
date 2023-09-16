@@ -10,7 +10,9 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10*"></ColumnDefinition>
-            <ColumnDefinition Width="65*"></ColumnDefinition>
+            <ColumnDefinition Width="15*"></ColumnDefinition>
+            <ColumnDefinition Width="15*"></ColumnDefinition>
+            <ColumnDefinition Width="15*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
@@ -45,16 +47,54 @@
                 <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
             <StackPanel Orientation="Horizontal" Grid.Row="0">
-                <Button Content="Додати дату..." x:Name="Btn_AddDate" Click="Btn_AddDate_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+                <Button Content="Додати дату..." x:Name="Btn_AddDate" Click="Btn_AddDate_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
                 <Button Content="Редагувати" x:Name="Btn_EditDay" Click="Btn_EditDay_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
                 <Button Content="Видалити" x:Name="Btn_DeleteDay" Click="Btn_DeleteDay_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
             </StackPanel>
-            <ListView x:Name="ListDailyReports" Height="Auto" Grid.Row="1">
+            <ListView x:Name="ListDailyReports" SelectionChanged="ListDailyReports_SelectionChanged" Height="Auto" Grid.Row="1">
                 <ListView.View>
 
                     <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік лікарів">
 
                         <GridViewColumn DisplayMemberBinding="{Binding Path=ReportDate_Str}" Header="Дата" Width="Auto"/>
+                    </GridView>
+
+                </ListView.View>
+            </ListView>
+        </Grid>
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Row="0">
+                <Button Content="Додати місто..." x:Name="Btn_AddCity" Click="Btn_AddCity_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+            </StackPanel>
+            <ListView x:Name="ListCitiesReport" Height="Auto" Grid.Row="1">
+                <ListView.View>
+
+                    <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік міст">
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=NameCity}" Header="Місто" Width="Auto"/>
+                    </GridView>
+
+                </ListView.View>
+            </ListView>
+        </Grid>
+        <Grid Grid.Column="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Row="0">
+                <Button Content="Додати лікарню..." x:Name="Btn_AddHospital" Click="Btn_AddHospital_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+            </StackPanel>
+            <ListView x:Name="ListHospitalsReport" Height="Auto" Grid.Row="1">
+                <ListView.View>
+
+                    <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік лікарів">
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=NameHospital}" Header="Назва" Width="Auto"/>
                     </GridView>
 
                 </ListView.View>

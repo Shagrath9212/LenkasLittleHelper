@@ -2,10 +2,10 @@
 {
     public class Hospital
     {
-        public int IdHospital { get; }
-        public string City { get; }
-        public int IdCity { get; }
-        public string Title { get; }
+        public int IdHospital { get; protected set; }
+        public string City { get; protected set; }
+        public int IdCity { get; protected set; }
+        public string Title { get; protected set; }
 
         public Hospital(int idHospital, string city, int idCity, string title)
         {
