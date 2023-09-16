@@ -13,7 +13,7 @@ namespace LenkasLittleHelper
     {
         public ObservableCollection<City> Cities { get; } = new();
 
-        private Hospital? hospitalCurr { get; set; }
+        private Hospital_Directories? hospitalCurr { get; set; }
 
         private void Init()
         {
@@ -29,7 +29,7 @@ namespace LenkasLittleHelper
             Init();
         }
 
-        public EditHospital(Hospital hospital)
+        public EditHospital(Hospital_Directories hospital)
         {
             hospitalCurr = hospital;
             Init();

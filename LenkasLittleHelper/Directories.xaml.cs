@@ -11,8 +11,8 @@ namespace LenkasLittleHelper
     /// </summary>
     public partial class Directories : Window
     {
-        public ObservableCollection<Hospital> Hospitals { get; } = new ObservableCollection<Hospital>();
-        public ObservableCollection<Doctor> Doctors { get; } = new ObservableCollection<Doctor>();
+        public ObservableCollection<Hospital_Directories> Hospitals { get; } = new ObservableCollection<Hospital_Directories>();
+        public ObservableCollection<Doctor_Directory> Doctors { get; } = new ObservableCollection<Doctor_Directory>();
 
         public Directories()
         {
@@ -45,7 +45,7 @@ namespace LenkasLittleHelper
                     string city = e.IsDBNull("CITY") ? string.Empty : e.GetString("CITY");
                     int idCity = e.IsDBNull("ID_CITY") ? 0 : e.GetInt32("ID_CITY");
 
-                    Hospitals.Add(new Hospital(idHospital, city, idCity, hospital));
+                    Hospitals.Add(new Hospital_Directories(idHospital, city, idCity, hospital));
                 }
             });
         }
@@ -89,7 +89,7 @@ namespace LenkasLittleHelper
                     string category = e.IsDBNull("CATEGORY") ? string.Empty : e.GetString("CATEGORY");
                     bool visitable = e.IsDBNull("VISITABLE") ? false : e.GetBoolean("VISITABLE");
 
-                    Doctors.Add(new Doctor(idDoctor, fullName, speciality, phoneNum, street, buildNumber, category, visitable));
+                    Doctors.Add(new Doctor_Directory(idDoctor, fullName, speciality, phoneNum, street, buildNumber, category, visitable));
                 }
             });
         }
@@ -110,7 +110,7 @@ namespace LenkasLittleHelper
                 return;
             }
 
-            var hospital = (Hospital)ListHospitals.SelectedValue;
+            var hospital = (Hospital_Directories)ListHospitals.SelectedValue;
 
             InitDoctors(hospital.IdHospital);
         }
@@ -122,7 +122,7 @@ namespace LenkasLittleHelper
                 return;
             }
 
-            var hospital = (Hospital)ListHospitals.SelectedValue;
+            var hospital = (Hospital_Directories)ListHospitals.SelectedValue;
 
             var pageEdit = new EditHospital(hospital);
             pageEdit.Show();
