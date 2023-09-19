@@ -139,7 +139,7 @@ namespace LenkasLittleHelper
                                     sheet.CreateRow(rowStart += 1).CreateCell(3).SetCellValue(build.Key);
                                 }
 
-                                bool doctorsFirstIteration = true;
+                                //bool doctorsFirstIteration = true;
 
                                 //foreach ((string?, string?) doctor in build.Value)
                                 //{

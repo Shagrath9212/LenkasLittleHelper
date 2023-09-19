@@ -1,7 +1,9 @@
 ﻿using LenkasLittleHelper.Database;
 using LenkasLittleHelper.Models;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Linq;
 using System.Windows;
 
 namespace LenkasLittleHelper
@@ -34,6 +36,13 @@ namespace LenkasLittleHelper
             hospitalCurr = hospital;
             Init();
 
+            SetCitySelected(hospital.IdCity);
+
+            HospitalName.Text = hospital.Title;
+        }
+
+        private void SetCitySelected(int idCity)
+        {
             foreach (var city in ListCities.Items)
             {
                 var _city = (City)city;
@@ -42,13 +51,12 @@ namespace LenkasLittleHelper
                     continue;
                 }
 
-                if (_city.Id == hospital.IdCity)
+                if (_city.Id == idCity)
                 {
                     ListCities.SelectedItem = city;
                     break;
                 }
             }
-            HospitalName.Text = hospital.Title;
         }
 
         private void InitCities()
@@ -81,13 +89,59 @@ namespace LenkasLittleHelper
 
             var selectedCity = (City)ListCities.SelectedItem;
 
-            if (hospitalCurr != null)
+            int idCity = selectedCity?.Id ?? -1;
+
+            if (!string.IsNullOrEmpty(CityNameCustom.Text))
             {
-                sql = $@"UPDATE HOSPITALS SET ID_CITY={selectedCity.Id} 
-                            WHERE ID_HOSPITAL={hospitalCurr.IdHospital}";
+                if (Cities.FirstOrDefault
+                    (e => !string.IsNullOrEmpty(e.CityName) && e.CityName.ToLower() == CityNameCustom.Text.ToLower()) != null)
+                {
+                    MessageBox.Show($"Місто {CityNameCustom.Text} уже існує у колекції міст!", "Помилка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                string addCitySql = "INSERT INTO CITIES (TITLE) VALUES (@nameCity)";
+
+                Dictionary<string, object>? cmdParams = new()
+                {
+                    {"nameCity",CityNameCustom.Text }
+                };
+
+                var error = DBHelper.DoCommand(addCitySql, cmdParams);
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    MessageBox.Show(error, "Помилка!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                string getLastId = "SELECT ID_CITY FROM CITIES ORDER BY ID_CITY DESC";
+
+                DBHelper.ExecuteReader(getLastId, e =>
+                {
+                    if (e.Read())
+                    {
+                        idCity = e.GetValueOrDefault("ID_CITY", idCity);
+                    }
+                });
             }
 
-            DBHelper.DoCommand(sql);
+            var hospitalsCmdParams = new Dictionary<string, object>
+            {
+                { "title", HospitalName.Text },
+                { "idCity", idCity }
+            };
+
+            if (hospitalCurr != null)
+            {
+                sql = $@"UPDATE HOSPITALS SET ID_CITY=@idCity, TITLE=@title
+                            WHERE ID_HOSPITAL={hospitalCurr.IdHospital}";
+            }
+            else
+            {
+                sql = "INSERT INTO HOSPITALS (TITLE,ID_CITY) VALUES (@title,@idCity)";
+            }
+
+            DBHelper.DoCommand(sql, hospitalsCmdParams);
 
             this.Close();
         }

@@ -364,7 +364,7 @@ namespace LenkasLittleHelper
             {
                 return;
             }
-            var reportEditDoctor = new Report_EditDoctor(hospital.IdHospital, hospital.IdReportHospital, hospital.Title);
+            var reportEditDoctor = new Report_EditDoctor(hospital.IdHospital, hospital.IdReportHospital, hospital.Title, ReportDoctors.Select(e => e.IdDoctor));
             reportEditDoctor.Show();
 
             reportEditDoctor.Closed += (s, e) =>

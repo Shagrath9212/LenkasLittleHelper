@@ -10,6 +10,9 @@
     <Compile Update="Directories.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Directory_AddEditDoctor.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="EditHospital.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -34,6 +37,9 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Directories.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Directory_AddEditDoctor.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="EditHospital.xaml">

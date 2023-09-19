@@ -12,10 +12,17 @@
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Margin="10" Grid.Row="0">
-            <Label Content="Місто"/>
-            <ComboBox x:Name="ListCities"
-                    DisplayMemberPath="CityName"
-                    SelectedValuePath="CityName"/>
+            <Label Content="Місто (вибери зі списку, або введи нове)"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*"></ColumnDefinition>
+                    <ColumnDefinition Width="5*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="ListCities" Grid.Column="0"
+        DisplayMemberPath="CityName"
+        SelectedValuePath="CityName"/>
+                <TextBox x:Name="CityNameCustom" Grid.Column="1"/>
+            </Grid>
             <Label Content="Назва закладу:"/>
             <TextBox x:Name="HospitalName" />
         </StackPanel>

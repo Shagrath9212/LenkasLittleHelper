@@ -1,5 +1,7 @@
 ﻿using LenkasLittleHelper.Database;
 using LenkasLittleHelper.Models;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 
@@ -13,17 +15,17 @@ namespace LenkasLittleHelper
         public ObservableCollection<Doctor> Doctors { get; } = new();
         private int IdHospital { get; }
         private int IdReportHospital { get; }
-        public Report_EditDoctor(int idHospital, int idReportHospital, string? nameHospital)
+        public Report_EditDoctor(int idHospital, int idReportHospital, string? nameHospital, IEnumerable<int> existingDoctors)
         {
             IdHospital = idHospital;
             IdReportHospital = idReportHospital;
             InitializeComponent();
             ListDoctors.ItemsSource = Doctors;
             Title = $"Вибір лікаря для {nameHospital}";
-            LoadDoctors();
+            LoadDoctors(existingDoctors);
         }
 
-        private void LoadDoctors()
+        private void LoadDoctors(IEnumerable<int> existingDoctors)
         {
             Doctors.Clear();
             string sql = @$"SELECT
@@ -37,7 +39,8 @@ namespace LenkasLittleHelper
                     ON D.ID_ADDRESS = A.ID_ADDRESS
                   LEFT JOIN SPECIALITIES S
                     ON D.SPECIALITY = S.ID_SPECIALITY
-                WHERE A.ID_HOSPITAL = {IdHospital}";
+                WHERE A.ID_HOSPITAL = {IdHospital}
+                AND D.ID_DOCTOR NOT IN ({string.Join(',', existingDoctors)})";
 
             var error = DBHelper.ExecuteReader(sql, e =>
             {

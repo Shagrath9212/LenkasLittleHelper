@@ -17,15 +17,26 @@
 
     public class Hospital_Directories : Hospital_Base
     {
-        public string City { get; protected set; }
-        public int IdCity { get; protected set; }
+        public string City { get; }
 
-        public Hospital_Directories(int idHospital, string city, int idCity, string title)
+        public int IdCity { get; }
+
+        public bool IsArchived { get; }
+
+        /// <summary>
+        /// Віртуальна колонка, яка вказує чи потрібно завантажувати усіх лікарів
+        /// </summary>
+        public bool DoLoadAll { get; }
+
+
+        public Hospital_Directories(int idHospital, string city, int idCity, string title, bool isArchived, bool doLoadAll = false)
         {
             IdHospital = idHospital;
             City = city;
             IdCity = idCity;
             Title = title;
+            IsArchived = isArchived;
+            DoLoadAll = doLoadAll;
         }
     }
 
@@ -34,7 +45,6 @@
         public int IdReportHospital { get; }
         public ReportHospital(int idReportHospital, int idHospital, string? nameHospital)
         {
-
             IdReportHospital = idReportHospital;
             IdHospital = idHospital;
             Title = nameHospital;
