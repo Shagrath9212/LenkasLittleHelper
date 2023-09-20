@@ -28,7 +28,7 @@ namespace LenkasLittleHelper
             Btn_MakeExcel.IsEnabled = false;
             Btn_AddDate.IsEnabled = false;
             Btn_EditDay.IsEnabled = false;
-            Btn_EditDay.IsEnabled = false;
+            Btn_DeleteDay.IsEnabled = false;
         }
 
         private void LevelTwo()
@@ -178,7 +178,28 @@ namespace LenkasLittleHelper
 
         private void Btn_DeleteDay_Click(object sender, RoutedEventArgs e)
         {
+            if (ListDailyReports.SelectedItem is not Models.ReportDay day)
+            {
+                return;
+            }
+            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити усі записи на дату {day.ReportDate_Str}?", "Попередження", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+            string sql = $"DELETE FROM REPORT_DAYS WHERE ID_REPORT_DAY={day.IdReportDay}";
 
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MessageBox.Show(error, "Помилка при видаленні!", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+            if (ListReports.SelectedItem is Report report)
+            {
+                LoadDayReports(report.IdReport);
+            }
         }
 
         private void ListDailyReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -188,11 +209,13 @@ namespace LenkasLittleHelper
             if (day == null)
             {
                 Btn_AddCity.IsEnabled = false;
+                Btn_DeleteDay.IsEnabled = false;
                 DisableNestedControls(2);
                 return;
             }
 
             Btn_AddCity.IsEnabled = true;
+            Btn_DeleteDay.IsEnabled = true;
             LoadCities(day.IdReportDay);
         }
         #endregion
@@ -207,7 +230,7 @@ namespace LenkasLittleHelper
                 return;
             }
 
-            var addCityDlg = new Report_CityEdit(day.IdReportDay, day.ReportDate_Str);
+            var addCityDlg = new Report_CityEdit(day.IdReportDay, day.ReportDate_Str, ReportsCities.Select(e => e.Id));
             addCityDlg.Show();
 
             addCityDlg.Closed += (s, e) =>
@@ -304,12 +327,12 @@ namespace LenkasLittleHelper
 
         private void Btn_AddHospital_Click(object sender, RoutedEventArgs e)
         {
-            var city = (ReportCity)ListCitiesReport.SelectedItem;
-            if (city == null)
+            if (ListCitiesReport.SelectedItem is not ReportCity city)
             {
                 return;
             }
-            var hospitalEdit = new Report_HospitalEdit(city.Id, city.IdReportCity, city.CityName);
+
+            var hospitalEdit = new Report_HospitalEdit(city.Id, city.IdReportCity, city.CityName, ReportHospitals.Select(e => e.IdHospital));
             hospitalEdit.Show();
 
             hospitalEdit.Closed += (s, e) =>
@@ -359,11 +382,11 @@ namespace LenkasLittleHelper
 
         private void Btn_AddDoctor_Click(object sender, RoutedEventArgs e)
         {
-            var hospital = (ReportHospital)ListHospitalsReport.SelectedItem;
-            if (hospital == null)
+            if (ListHospitalsReport.SelectedItem is not ReportHospital hospital)
             {
                 return;
             }
+
             var reportEditDoctor = new Report_EditDoctor(hospital.IdHospital, hospital.IdReportHospital, hospital.Title, ReportDoctors.Select(e => e.IdDoctor));
             reportEditDoctor.Show();
 

@@ -1,5 +1,7 @@
 ﻿using LenkasLittleHelper.Database;
 using LenkasLittleHelper.Models;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 
@@ -12,19 +14,21 @@ namespace LenkasLittleHelper
     {
         public ObservableCollection<City> Cities { get; } = new();
         private int IdDayReport { get; }
-        public Report_CityEdit(int idDayReport, string date)
+        public Report_CityEdit(int idDayReport, string date, IEnumerable<int> alreadyAdded)
         {
             IdDayReport = idDayReport;
             InitializeComponent();
             Title = $"Додавання міста на {date}";
             ListCities.ItemsSource = Cities;
-            InitCities();
+            InitCities(alreadyAdded);
         }
 
-        private void InitCities()
+        private void InitCities(IEnumerable<int> alreadyAdded)
         {
             Cities.Clear();
-            string sql = "SELECT ID_CITY, TITLE CITY_NAME FROM CITIES ORDER BY TITLE";
+            string sql = @$"SELECT ID_CITY, TITLE CITY_NAME FROM CITIES 
+                    WHERE ID_CITY NOT IN ({string.Join(',', alreadyAdded)}) 
+                    ORDER BY TITLE";
 
             var error = DBHelper.ExecuteReader(sql, e =>
             {
