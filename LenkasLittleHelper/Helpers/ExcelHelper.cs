@@ -5,7 +5,7 @@ namespace LenkasLittleHelper.Helpers
 {
     public class ExcelDocument : XSSFWorkbook
     {
-        public static XSSFWorkbook? OpenFromTemplate(string path)
+        public static ExcelDocument? OpenFromTemplate(string path)
         {
             if (!File.Exists(path))
             {
@@ -14,10 +14,18 @@ namespace LenkasLittleHelper.Helpers
 
             using (var stream = File.OpenRead(path))
             {
-
+                return new ExcelDocument(stream);
             }
+        }
 
-            return null;
+        private ExcelDocument(Stream stream) : base(stream)
+        {
+            
+        }
+
+        private ExcelDocument() : base()
+        {
+
         }
 
         public static ExcelDocument CreateNew()

@@ -5,31 +5,68 @@ using System.Collections.Generic;
 using NPOI.SS.Util;
 using System.IO;
 using System.Linq;
+using LenkasLittleHelper.Models;
+using NPOI.SS.UserModel;
+using System.Windows;
+using System.Windows.Data;
 
 namespace LenkasLittleHelper
 {
-    internal class MakeReport
+    internal static class MakeReport
     {
         public static string Pathh = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        private const string Template = "template.xlsx";
 
         public static void CreateReport_Fact(int idReport)
         {
             var days = LoadDays(idReport);
 
-            using (var document = ExcelDocument.CreateNew())
+            if (!File.Exists(Template))
             {
-                var rowStart = -1;
-                var sheet = document.CreateSheet();
+                MessageBox.Show($"Відсутній файл шаблону ({Template})", "Помилка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            using (var document = ExcelDocument.OpenFromTemplate(Template))
+            {
+                var cellFont = document.CreateFont();
+
+                cellFont.FontName = "Arial";
+                cellFont.FontHeightInPoints = 10;
+
+                var cellStyle = document.CreateCellStyle();
+                cellStyle.SetFont(cellFont);
+
+                cellStyle.BorderTop = BorderStyle.Thin;
+                cellStyle.BorderBottom = BorderStyle.Thin;
+                cellStyle.BorderLeft = BorderStyle.Thin;
+                cellStyle.BorderRight = BorderStyle.Thin;
+                cellStyle.WrapText = true;
+                cellStyle.VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment.Center;
+
+                var rowStart = 0;
+                var sheet = document.GetSheetAt(0);
 
                 foreach (var day in days)
                 {
                     var rowDayStart = rowStart + 1;
 
-                    sheet.CreateRow(rowStart += 1).CreateCell(0).SetCellValue(day.Value.ToDBFormat_DateOnly());
+                    var rowCity = sheet.CreateRow(rowStart += 1);
+
+                    rowCity.CreateCell(0).SetCellValue(day.Value.ToDBFormat_DateOnly());
+
+                    rowCity.CreateCell(2).SetCellValue("Станіславчук Олена");
 
                     var cities = LoadCities(day.Key);
                     if ((cities != null && !cities.Any()) || cities == null)
                     {
+                        sheet.GetRow(rowStart).CreateCell(1).SetBlank();
+                        sheet.GetRow(rowStart).CreateCell(3).SetBlank();
+                        sheet.GetRow(rowStart).CreateCell(4).SetBlank();
+                        sheet.GetRow(rowStart).CreateCell(5).SetBlank();
+                        sheet.GetRow(rowStart).CreateCell(6).SetBlank();
+                        sheet.GetRow(rowStart).CreateCell(7).SetBlank();
                         continue;
                     }
 
@@ -53,6 +90,11 @@ namespace LenkasLittleHelper
 
                         if ((hospitals != null && !hospitals.Any()) || hospitals == null)
                         {
+                            sheet.GetRow(rowStart).CreateCell(3).SetBlank();
+                            sheet.GetRow(rowStart).CreateCell(4).SetBlank();
+                            sheet.GetRow(rowStart).CreateCell(5).SetBlank();
+                            sheet.GetRow(rowStart).CreateCell(6).SetBlank();
+                            sheet.GetRow(rowStart).CreateCell(7).SetBlank();
                             continue;
                         }
 
@@ -64,57 +106,66 @@ namespace LenkasLittleHelper
                             if (isHospitalFirstIteration)
                             {
                                 rowHospitalStart -= 1;
-                                sheet.GetRow(rowStart).CreateCell(2).SetCellValue(hospital.Value);
+                                sheet.GetRow(rowStart).CreateCell(3).SetCellValue(hospital.Value);
                                 isHospitalFirstIteration = false;
                             }
                             else
                             {
-                                sheet.CreateRow(rowStart += 1).CreateCell(2).SetCellValue(hospital.Value);
+                                sheet.CreateRow(rowStart += 1).CreateCell(3).SetCellValue(hospital.Value);
                             }
 
-                            Dictionary<int, List<(string?, string?)>> buildings = LoadBuildings(hospital.Key);
-                            if (buildings == null || !buildings.Any())
+                            IEnumerable<ReportBuilding> buildingsNDoctors = LoadBuildingsAndDoctors(hospital.Key);
+
+                            if (buildingsNDoctors == null || !buildingsNDoctors.Any())
                             {
+                                sheet.GetRow(rowStart).CreateCell(4).SetBlank();
+                                sheet.GetRow(rowStart).CreateCell(5).SetBlank();
+                                sheet.GetRow(rowStart).CreateCell(6).SetBlank();
+                                sheet.GetRow(rowStart).CreateCell(7).SetBlank();
                                 continue;
                             }
 
                             bool isBuildingFirstIteration = true;
 
-                            foreach (KeyValuePair<int, List<(string?, string?)>> building in buildings)
+                            foreach (var building in buildingsNDoctors)
                             {
                                 var rowBuildStart = rowStart + 1;
                                 if (isBuildingFirstIteration)
                                 {
                                     rowBuildStart -= 1;
-                                    sheet.GetRow(rowStart).CreateCell(3).SetCellValue(building.Key);
-                                    sheet.GetRow(rowStart).CreateCell(4).SetCellValue(building.Key);
+                                    sheet.GetRow(rowStart).CreateCell(4).SetCellValue(building.Street);
+                                    sheet.GetRow(rowStart).CreateCell(5).SetCellValue(building.NumBuilding);
                                     isBuildingFirstIteration = false;
                                 }
                                 else
                                 {
-                                    sheet.CreateRow(rowStart += 1).CreateCell(3).SetCellValue(building.Key);
-                                    sheet.CreateRow(rowStart += 1).CreateCell(4).SetCellValue(building.Key);
-                                }
-                                if (building.Value == null || !building.Value.Any())
-                                {
-                                    continue;
+                                    var row = sheet.CreateRow(rowStart += 1);
+                                    row.CreateCell(4).SetCellValue(building.Street);
+                                    row.CreateCell(5).SetCellValue(building.NumBuilding);
                                 }
 
                                 bool isDoctorFirstIteration = true;
 
-                                foreach (var doctor in building.Value)
+                                if (building.Doctors == null || !building.Doctors.Any())
+                                {
+                                    sheet.GetRow(rowStart).CreateCell(6).SetBlank();
+                                    sheet.GetRow(rowStart).CreateCell(7).SetBlank();
+                                    continue;
+                                }
+
+                                foreach (var doctor in building.Doctors)
                                 {
                                     if (isDoctorFirstIteration)
                                     {
-                                        sheet.GetRow(rowStart).CreateCell(5).SetCellValue(doctor.Item1);
-                                        sheet.GetRow(rowStart).CreateCell(6).SetCellValue(doctor.Item2);
+                                        sheet.GetRow(rowStart).CreateCell(6).SetCellValue(doctor.Item1);
+                                        sheet.GetRow(rowStart).CreateCell(7).SetCellValue(doctor.Item2);
                                         isDoctorFirstIteration = false;
                                     }
                                     else
                                     {
                                         var row = sheet.CreateRow(rowStart += 1);
-                                        row.CreateCell(5).SetCellValue(doctor.Item1);
-                                        row.CreateCell(6).SetCellValue(doctor.Item2);
+                                        row.CreateCell(6).SetCellValue(doctor.Item1);
+                                        row.CreateCell(7).SetCellValue(doctor.Item2);
                                     }
                                 }
 
@@ -123,11 +174,13 @@ namespace LenkasLittleHelper
                                     continue;
                                 }
 
-                                CellRangeAddress craBuild = new(rowBuildStart, sheet.LastRowNum, 3, 3);
+                                CellRangeAddress craBuild = new(rowBuildStart, sheet.LastRowNum, 4, 4);
                                 sheet.AddMergedRegion(craBuild);
-                                
-                                CellRangeAddress craBuild2 = new(rowBuildStart, sheet.LastRowNum, 4, 4);
+                                sheet.SetCellRangeBorders(craBuild);
+
+                                CellRangeAddress craBuild2 = new(rowBuildStart, sheet.LastRowNum, 5, 5);
                                 sheet.AddMergedRegion(craBuild2);
+                                sheet.SetCellRangeBorders(craBuild2);
                             }
 
                             if (sheet.LastRowNum - rowHospitalStart < 1)
@@ -135,9 +188,10 @@ namespace LenkasLittleHelper
                                 continue;
                             }
 
-                            CellRangeAddress craHospital = new(rowHospitalStart, sheet.LastRowNum, 2, 2);
+                            CellRangeAddress craHospital = new(rowHospitalStart, sheet.LastRowNum, 3, 3);
 
                             sheet.AddMergedRegion(craHospital);
+                            sheet.SetCellRangeBorders(craHospital);
                         }
 
                         if (sheet.LastRowNum - rowCityStart < 1)
@@ -145,9 +199,10 @@ namespace LenkasLittleHelper
                             continue;
                         }
 
-                        CellRangeAddress craCity = new(rowCityStart, sheet.LastRowNum, 1, 1); ;
+                        CellRangeAddress craCity = new(rowCityStart, sheet.LastRowNum, 1, 1);
 
                         sheet.AddMergedRegion(craCity);
+                        sheet.SetCellRangeBorders(craCity);
                     }
 
                     var rowSpanDay = sheet.LastRowNum - rowDayStart;
@@ -157,9 +212,30 @@ namespace LenkasLittleHelper
                         continue;
                     }
 
-                    CellRangeAddress craDay = new(rowDayStart, sheet.LastRowNum, 0, 0); ;
+                    CellRangeAddress craDay = new(rowDayStart, sheet.LastRowNum, 0, 0);
 
                     sheet.AddMergedRegion(craDay);
+                    sheet.SetCellRangeBorders(craDay);
+
+                    CellRangeAddress craLenka = new(rowDayStart, sheet.LastRowNum, 2, 2);
+
+                    sheet.AddMergedRegion(craLenka);
+                    sheet.SetCellRangeBorders(craLenka);
+                }
+
+                for (int i = 1; i < sheet.LastRowNum + 1; i++)
+                {
+                    var row = sheet.GetRow(i);
+
+                    for (int cellStart = 8; cellStart <= 10; cellStart++)
+                    {
+                        row.CreateCell(cellStart).SetBlank();
+                    }
+
+                    foreach (var cell in row.Cells)
+                    {
+                        cell.CellStyle = cellStyle;
+                    }
                 }
 
                 document.SaveAs(Path.Combine(Pathh, "Reports", $"new{DateTime.Now.Ticks}.xlsx"));
@@ -263,6 +339,59 @@ namespace LenkasLittleHelper
             });
 
             return buildings;
+        }
+
+        public static IEnumerable<ReportBuilding> LoadBuildingsAndDoctors(int idReportHospital)
+        {
+            string sql = @$"SELECT
+				  A.STREET,
+				  A.BUILD_NUMBER,
+                  D.ID_ADDRESS,
+                  D.FULL_NAME,
+                  S.NAME_SPECIALITY
+                FROM REPORT_DOCTORS RD
+                  LEFT JOIN DOCTORS D
+                    ON RD.ID_DOCTOR = D.ID_DOCTOR
+                  LEFT JOIN SPECIALITIES S
+                    ON D.SPECIALITY = S.ID_SPECIALITY
+					LEFT JOIN ADDRESSES A ON D.ID_ADDRESS=A.ID_ADDRESS
+                WHERE RD.ID_REPORT_HOSPITAL = {idReportHospital}";
+
+            Dictionary<int, ReportBuilding> buildings = new();
+
+            DBHelper.ExecuteReader(sql, e =>
+            {
+                while (e.Read())
+                {
+                    int idAddress = e.GetValueOrDefault<int>("ID_ADDRESS");
+                    string? street = e.GetValueOrDefault<string>("STREET");
+                    string? buildNumber = e.GetValueOrDefault<string>("BUILD_NUMBER");
+
+                    string? fullName = e.GetValueOrDefault<string>("FULL_NAME");
+                    string? speciality = e.GetValueOrDefault<string>("NAME_SPECIALITY");
+
+                    if (!buildings.TryGetValue(idAddress, out ReportBuilding? building))
+                    {
+                        building = new ReportBuilding(street, buildNumber);
+                        buildings.Add(idAddress, building);
+                        //doctors = new List<(string?, string?)>();
+                        //buildings.Add(idAddress, doctors);
+                    }
+
+                    building.AddDoctor(fullName, speciality);
+                    //doctors.Add((fullName, speciality));
+                }
+            });
+
+            return buildings.Values;
+        }
+
+        public static void SetCellRangeBorders(this ISheet worksheet, CellRangeAddress cra)
+        {
+            RegionUtil.SetBorderTop((int)BorderStyle.Thin, cra, worksheet);
+            RegionUtil.SetBorderRight((int)BorderStyle.Thin, cra, worksheet);
+            RegionUtil.SetBorderBottom((int)BorderStyle.Thin, cra, worksheet);
+            RegionUtil.SetBorderLeft((int)BorderStyle.Thin, cra, worksheet);
         }
     }
 }
