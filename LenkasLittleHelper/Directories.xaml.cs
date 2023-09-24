@@ -203,7 +203,7 @@ namespace LenkasLittleHelper
                     string? nameHospital = e.GetValueOrDefault<string>("NAME_HOSPITAL");
                     string buildNumber = e.IsDBNull("BUILD_NUMBER") ? string.Empty : e.GetString("BUILD_NUMBER");
                     string category = e.IsDBNull("CATEGORY") ? string.Empty : e.GetString("CATEGORY");
-                    bool visitable = e.IsDBNull("VISITABLE") ? false : e.GetBoolean("VISITABLE");
+                    bool visitable = e.GetValueOrDefault<bool>("VISITABLE");
 
                     int idSpecialiity = e.GetValueOrDefault<int>("SPECIALITY");
                     int idAddress = e.GetValueOrDefault<int>("ID_ADDRESS");

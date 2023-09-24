@@ -5,9 +5,6 @@ using System.Windows;
 
 namespace LenkasLittleHelper
 {
-    /// <summary>
-    /// Interaction logic for ReportEdit.xaml
-    /// </summary>
     public partial class ReportEdit : Window
     {
         public ReportEdit()
@@ -25,7 +22,7 @@ namespace LenkasLittleHelper
                 {"dt",DateTime.Now.Ticks}
             };
 
-            var error = DBHelper.DoCommand(sql, cmdParams);
+            DBHelper.DoCommand(sql, cmdParams);
             
             Close();
         }

@@ -12,6 +12,7 @@ namespace LenkasLittleHelper.Models
 
     public class Doctor : Doctor_Base
     {
+        public bool IsChecked { get; set; }
         public string? DoctorTitle
         {
             get { return $"{FullName}, {Speciality}, {Address}"; }

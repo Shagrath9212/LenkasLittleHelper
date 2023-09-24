@@ -3,7 +3,7 @@
     public abstract class Hospital_Base
     {
         public int IdHospital { get; protected set; }
-        public string? Title { get; protected set; }
+        public string? Title { get; set; }
     }
 
     public class Hospital : Hospital_Base

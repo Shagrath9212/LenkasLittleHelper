@@ -4,11 +4,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Lenka's little helper" Height="450" Width="800">
+        Title="Lenka's little helper" Height="100" Width="200">
     <Grid>
-        <StackPanel Orientation="Horizontal">
+        <StackPanel VerticalAlignment="Top">
+            <Menu Width="Auto" Height="20">
+                <MenuItem Header="_Tools">
+                    <MenuItem x:Name="Options" Header="_Options" HorizontalAlignment="Left" Width="140"/>
+                </MenuItem>
+                <MenuItem Header="_Help">
+                    <MenuItem x:Name="About" Header="&amp;About" HorizontalAlignment="Left" Width="140"/>
+                </MenuItem>
+            </Menu>
+        </StackPanel>
+        <!--<StackPanel Orientation="Horizontal">
             <Button Content="Звіти" x:Name="Btn_Reports" Click="Btn_Reports_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
             <Button Content="Довідники" x:Name="Btn_Directories" Click="Btn_Directories_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
-        </StackPanel>
+        </StackPanel>-->
     </Grid>
 </Window>

@@ -11,9 +11,9 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10*"></ColumnDefinition>
             <ColumnDefinition Width="15*"></ColumnDefinition>
-            <ColumnDefinition Width="10*"></ColumnDefinition>
             <ColumnDefinition Width="15*"></ColumnDefinition>
-            <ColumnDefinition Width="45*"></ColumnDefinition>
+            <ColumnDefinition Width="15*"></ColumnDefinition>
+            <ColumnDefinition Width="40*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
@@ -23,6 +23,7 @@
             <StackPanel Orientation="Horizontal" Grid.Row="0">
                 <Button Content="+ звіт..." x:Name="Btn_AddReport" Click="Btn_AddReport_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
                 <Button Content="Excel" x:Name="Btn_MakeExcel" Click="Btn_MakeExcel_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+                <Button Content="Видалити" x:Name="Btn_deleteReport" Click="Btn_deleteReport_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
             </StackPanel>
             <ListView x:Name="ListReports" Height="Auto" Grid.Row="1" SelectionChanged="ListReports_SelectionChanged" ItemsSource="{Binding Hospitals}" DataContext="{Binding RelativeSource={RelativeSource Self}}">
                 <ListView.ItemContainerStyle>
@@ -47,6 +48,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
             <StackPanel Orientation="Horizontal" Grid.Row="0">
                 <Button Content="Додати дату..." x:Name="Btn_AddDate" Click="Btn_AddDate_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
@@ -60,17 +62,22 @@
 
                         <GridViewColumn DisplayMemberBinding="{Binding Path=ReportDate_Str}" Header="Дата" Width="Auto"/>
                     </GridView>
-
                 </ListView.View>
             </ListView>
+            <StackPanel Orientation="Vertical" Grid.Row="2">
+                <Label x:Name="Day_HospitalsTotal"></Label>
+                <Label x:Name="Day_DoctorsTotal"></Label>
+            </StackPanel>
         </Grid>
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
             <StackPanel Orientation="Horizontal" Grid.Row="0">
                 <Button Content="Додати місто..." x:Name="Btn_AddCity" Click="Btn_AddCity_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+                <Button Content="Видалити місто..." x:Name="Btn_DeleteCity" Click="Btn_DeleteCity_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
             </StackPanel>
             <ListView x:Name="ListCitiesReport" SelectionChanged="ListCitiesReport_SelectionChanged" Height="Auto" Grid.Row="1">
                 <ListView.View>
@@ -82,14 +89,20 @@
 
                 </ListView.View>
             </ListView>
+            <StackPanel Orientation="Vertical" Grid.Row="2">
+                <Label x:Name="City_HospitalsTotal"></Label>
+                <Label x:Name="City_DoctorsTotal"></Label>
+            </StackPanel>
         </Grid>
         <Grid Grid.Column="3">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
             <StackPanel Orientation="Horizontal" Grid.Row="0">
                 <Button Content="Додати лікарню..." x:Name="Btn_AddHospital" Click="Btn_AddHospital_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+                <Button Content="Видалити лікарню..." x:Name="Btn_DeleteHospital" Click="Btn_DeleteHospital_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
             </StackPanel>
             <ListView x:Name="ListHospitalsReport" SelectionChanged="ListHospitalsReport_SelectionChanged" Height="Auto" Grid.Row="1">
                 <ListView.View>
@@ -101,16 +114,22 @@
 
                 </ListView.View>
             </ListView>
+            <StackPanel Orientation="Vertical" Grid.Row="2">
+                <Label x:Name="Hospital_HospitalsTotal"></Label>
+                <Label x:Name="Hospital_DoctorsTotal"></Label>
+            </StackPanel>
         </Grid>
         <Grid Grid.Column="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
             <StackPanel Orientation="Horizontal" Grid.Row="0">
                 <Button Content="Додати лікаря..." x:Name="Btn_AddDoctor" Click="Btn_AddDoctor_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+                <Button Content="Видалити лікаря..." x:Name="Btn_DeleteDoctor" Click="Btn_DeleteDoctor_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
             </StackPanel>
-            <ListView x:Name="ListDoctorsReport" Height="Auto" Grid.Row="1">
+            <ListView x:Name="ListDoctorsReport" SelectionChanged="ListDoctorsReport_SelectionChanged" Height="Auto" Grid.Row="1">
                 <ListView.View>
 
                     <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік лікарів">
@@ -122,6 +141,9 @@
 
                 </ListView.View>
             </ListView>
+            <StackPanel Orientation="Vertical" Grid.Row="2">
+                <Label x:Name="Doctors_DoctorsTotal"></Label>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

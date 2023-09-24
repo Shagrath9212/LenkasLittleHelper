@@ -1,0 +1,44 @@
+﻿<Window x:Class="LenkasLittleHelper.Report_DoctorNew"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LenkasLittleHelper"
+        mc:Ignorable="d"
+        Title="Report_DoctorNew" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="9*"></RowDefinition>
+            <RowDefinition Height="1*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,5,20,5">
+            <Label Content="Пошук"></Label>
+            <TextBox x:Name="SearchDoctor" Width="100" TextChanged="SearchDoctor_TextChanged"></TextBox>
+        </StackPanel>
+        <ListView x:Name="ListDoctors" Height="Auto" Grid.Row="1" ItemsSource="{Binding Doctors}" SelectionChanged="ListDoctors_SelectionChanged" DataContext="{Binding RelativeSource={RelativeSource Self}}" >
+            <ListView.View>
+                <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік лікарів">
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=FullName}" Header="ПІБ" Width="200"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Speciality}" Header="Спеціальність" Width="200"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Address}" Header="Адреса" Width="200"/>
+
+                    <GridViewColumn x:Name="IsChecked" Width="50">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <CheckBox IsChecked="{Binding IsChecked}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                </GridView>
+
+            </ListView.View>
+        </ListView>
+        <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="2">
+            <Button x:Name="Doctor_Save" Click="Doctor_Save_Click" Content="Зберегти"></Button>
+        </StackPanel>
+    </Grid>
+</Window>

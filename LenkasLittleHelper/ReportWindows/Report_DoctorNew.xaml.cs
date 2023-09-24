@@ -1,21 +1,21 @@
 ﻿using LenkasLittleHelper.Database;
 using LenkasLittleHelper.Models;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 
 namespace LenkasLittleHelper
 {
     /// <summary>
-    /// Interaction logic for Report_EditDoctor.xaml
+    /// Interaction logic for Report_DoctorNew.xaml
     /// </summary>
-    public partial class Report_EditDoctor : Window
+    public partial class Report_DoctorNew : Window
     {
-        public ObservableCollection<Doctor> Doctors { get; } = new();
         private int IdHospital { get; }
         private int IdReportHospital { get; }
-        public Report_EditDoctor(int idHospital, int idReportHospital, string? nameHospital, IEnumerable<int> existingDoctors)
+        public ObservableCollection<Doctor> Doctors { get; } = new();
+        public Report_DoctorNew(int idHospital, int idReportHospital, string? nameHospital, IEnumerable<int> existingDoctors)
         {
             IdHospital = idHospital;
             IdReportHospital = idReportHospital;
@@ -24,7 +24,6 @@ namespace LenkasLittleHelper
             Title = $"Вибір лікаря для {nameHospital}";
             LoadDoctors(existingDoctors);
         }
-
         private void LoadDoctors(IEnumerable<int> existingDoctors)
         {
             Doctors.Clear();
@@ -40,7 +39,8 @@ namespace LenkasLittleHelper
                   LEFT JOIN SPECIALITIES S
                     ON D.SPECIALITY = S.ID_SPECIALITY
                 WHERE A.ID_HOSPITAL = {IdHospital}
-                AND D.ID_DOCTOR NOT IN ({string.Join(',', existingDoctors)})";
+                AND D.ID_DOCTOR NOT IN ({string.Join(',', existingDoctors)})
+                ORDER BY D.FULL_NAME";
 
             var error = DBHelper.ExecuteReader(sql, e =>
             {
@@ -57,19 +57,49 @@ namespace LenkasLittleHelper
             });
         }
 
-        private void Doctor_Save_Click(object sender, RoutedEventArgs e)
+        private void ListDoctors_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            var selectedDoctor = (Doctor)ListDoctors.SelectedItem;
-
-            if (selectedDoctor == null)
+            if (ListDoctors.SelectedItem is not Doctor doctor)
             {
                 return;
             }
+            System.Console.WriteLine(doctor.FullName);
+        }
 
-            string sql = $@"INSERT INTO REPORT_DOCTORS (ID_REPORT_HOSPITAL,ID_DOCTOR) 
-                            VALUES ({IdReportHospital},{selectedDoctor.IdDoctor})";
+        private void SearchDoctor_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(SearchDoctor.Text) || SearchDoctor.Text.Length < 2)
+            {
+                ListDoctors.ItemsSource = Doctors;
+                return;
+            }
 
-            var error = DBHelper.DoCommand(sql);
+            var filterText = SearchDoctor.Text.ToLower();
+
+            var filtered = Doctors.Where(d =>
+            !string.IsNullOrEmpty(d.FullName) && d.FullName.ToLower().IndexOf(filterText) != -1);
+
+            ListDoctors.ItemsSource = filtered;
+        }
+
+        private void Doctor_Save_Click(object sender, RoutedEventArgs e)
+        {
+
+            var selectedDoctors = Doctors.Where(d => d.IsChecked);
+
+            if (!selectedDoctors.Any())
+            {
+                Close();
+                return;
+            }
+
+            foreach (var doctor in selectedDoctors)
+            {
+                string sql = $@"INSERT INTO REPORT_DOCTORS (ID_REPORT_HOSPITAL,ID_DOCTOR) 
+                            VALUES ({IdReportHospital},{doctor.IdDoctor})";
+                
+                DBHelper.DoCommand(sql);
+            }
 
             Close();
         }

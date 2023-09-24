@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup />
+  <PropertyGroup>
+    <_LastSelectedProfileId>D:\Work space\LenkasLittleHelper\LenkasLittleHelper\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
+  </PropertyGroup>
   <ItemGroup>
     <ApplicationDefinition Update="App.xaml">
       <SubType>Designer</SubType>
@@ -25,10 +27,10 @@
     <Compile Update="ReportHelper.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Report_CityEdit.xaml.cs">
+    <Compile Update="ReportWindows\Report_CityEdit.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Report_EditDoctor.xaml.cs">
+    <Compile Update="ReportWindows\Report_DoctorNew.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Report_HospitalEdit.xaml.cs">
@@ -57,10 +59,10 @@
     <Page Update="ReportHelper.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Report_CityEdit.xaml">
+    <Page Update="ReportWindows\Report_CityEdit.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Report_EditDoctor.xaml">
+    <Page Update="ReportWindows\Report_DoctorNew.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Report_HospitalEdit.xaml">

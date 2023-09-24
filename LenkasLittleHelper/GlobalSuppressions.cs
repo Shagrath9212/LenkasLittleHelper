@@ -6,4 +6,3 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Style", "IDE0063:Use simple 'using' statement", Justification = "<Pending>", Scope = "member", Target = "~M:LenkasLittleHelper.MakeReport.CreateReport_Fact(System.Int32)")]
-[assembly: SuppressMessage("Style", "IDE0063:Use simple 'using' statement", Justification = "<Pending>", Scope = "member", Target = "~M:LenkasLittleHelper.Helpers.ExcelDocument.OpenFromTemplate(System.String)~NPOI.XSSF.UserModel.XSSFWorkbook")]

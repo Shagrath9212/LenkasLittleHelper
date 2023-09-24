@@ -27,25 +27,28 @@ namespace LenkasLittleHelper
             ReportsDays.Clear();
             Btn_MakeExcel.IsEnabled = false;
             Btn_AddDate.IsEnabled = false;
-            Btn_EditDay.IsEnabled = false;
-            Btn_DeleteDay.IsEnabled = false;
         }
 
         private void LevelTwo()
         {
             ReportsCities.Clear();
             Btn_AddCity.IsEnabled = false;
+            Btn_EditDay.IsEnabled = false;
+            Btn_DeleteDay.IsEnabled = false;
         }
         private void LevelThree()
         {
             ReportHospitals.Clear();
             Btn_AddHospital.IsEnabled = false;
+            Btn_DeleteCity.IsEnabled = false;
         }
 
         private void LevelFour()
         {
             ReportDoctors.Clear();
             Btn_AddDoctor.IsEnabled = false;
+            Btn_DeleteHospital.IsEnabled = false;
+            Doctors_DoctorsTotal.Content = null;
         }
 
         /// <summary>
@@ -161,7 +164,19 @@ namespace LenkasLittleHelper
 
         private void Btn_EditDay_Click(object sender, RoutedEventArgs e)
         {
+            if (ListDailyReports.SelectedItem is not Models.ReportDay day
+                || ListReports.SelectedItem is not Report report)
+            {
+                return;
+            }
 
+            var dt = new ReportDay(day);
+            dt.Show();
+
+            dt.Closed += (s, e) =>
+            {
+                LoadDayReports(report.IdReport);
+            };
         }
 
         private void Btn_AddDate_Click(object sender, RoutedEventArgs e)
@@ -209,13 +224,13 @@ namespace LenkasLittleHelper
             if (day == null)
             {
                 Btn_AddCity.IsEnabled = false;
-                Btn_DeleteDay.IsEnabled = false;
                 DisableNestedControls(2);
                 return;
             }
 
             Btn_AddCity.IsEnabled = true;
             Btn_DeleteDay.IsEnabled = true;
+            Btn_EditDay.IsEnabled = true;
             LoadCities(day.IdReportDay);
         }
         #endregion
@@ -275,10 +290,13 @@ namespace LenkasLittleHelper
             if (city == null)
             {
                 Btn_AddHospital.IsEnabled = false;
+                Btn_DeleteCity.IsEnabled = false;
                 DisableNestedControls(3);
                 return;
             }
+
             Btn_AddHospital.IsEnabled = true;
+            Btn_DeleteCity.IsEnabled = true;
             LoadHospitals(city.IdReportCity);
         }
         #endregion
@@ -317,11 +335,13 @@ namespace LenkasLittleHelper
             if (hospital == null)
             {
                 Btn_AddDoctor.IsEnabled = false;
+                Btn_DeleteHospital.IsEnabled = false;
                 DisableNestedControls(4);
                 return;
             }
 
             Btn_AddDoctor.IsEnabled = true;
+            Btn_DeleteHospital.IsEnabled = true;
             LoadDoctors(hospital.IdReportHospital);
         }
 
@@ -339,6 +359,27 @@ namespace LenkasLittleHelper
             {
                 LoadHospitals(city.IdReportCity);
             };
+        }
+
+        private void Btn_DeleteHospital_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListHospitalsReport.SelectedItem is not ReportHospital hospital)
+            {
+                return;
+            }
+
+            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити усі записи по лікарні {hospital.Title}?", "Попередження", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+
+            string sql = @$"DELETE
+                      FROM REPORT_HOSPITALS
+                    WHERE ID_REPORT_HOSPITAL = {hospital.IdReportHospital}";
+            DBHelper.DoCommand(sql);
+
+            ReportHospitals.Remove(hospital);
         }
         #endregion
 
@@ -378,6 +419,12 @@ namespace LenkasLittleHelper
                     ReportDoctors.Add(new Doctor_Report(idReportDoctor, idDoctor, fullName, nameSpeciality, street, buildNumber));
                 }
             });
+            Doctors_DoctorsTotal.Content = $"Всього лікарів {ReportDoctors.Count}";
+
+            if (ListHospitalsReport.SelectedItem is not ReportHospital hospital)
+            {
+                return;
+            }
         }
 
         private void Btn_AddDoctor_Click(object sender, RoutedEventArgs e)
@@ -387,7 +434,7 @@ namespace LenkasLittleHelper
                 return;
             }
 
-            var reportEditDoctor = new Report_EditDoctor(hospital.IdHospital, hospital.IdReportHospital, hospital.Title, ReportDoctors.Select(e => e.IdDoctor));
+            var reportEditDoctor = new Report_DoctorNew(hospital.IdHospital, hospital.IdReportHospital, hospital.Title, ReportDoctors.Select(e => e.IdDoctor));
             reportEditDoctor.Show();
 
             reportEditDoctor.Closed += (s, e) =>
@@ -405,7 +452,95 @@ namespace LenkasLittleHelper
             {
                 return;
             }
-            MakeReport.CreateReport_Fact(report.IdReport);
+
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new();
+
+            saveFileDialog.FileName = report.ReportName;
+            saveFileDialog.DefaultExt = ".xlsx";
+
+            bool? result = saveFileDialog.ShowDialog();
+
+            if (!result.HasValue || !result.Value)
+            {
+                return;
+            }
+
+            MakeReport.CreateReport_Fact(report.IdReport, saveFileDialog.FileName);
+        }
+
+        private void Btn_DeleteCity_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListCitiesReport.SelectedItem is not ReportCity city)
+            {
+                return;
+            }
+
+            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити усі записи по місту {city.CityName}?", "Попередження", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+            string sql = $@"DELETE
+                  FROM REPORT_CITIES
+                WHERE ID_REPORT_CITY = {city.IdReportCity}";
+
+            if (!string.IsNullOrEmpty(DBHelper.DoCommand(sql)))
+            {
+                return;
+            }
+
+            ReportsCities.Remove(city);
+        }
+
+        private void Btn_DeleteDoctor_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListDoctorsReport.SelectedItem is not Doctor_Report doctor
+                || ListHospitalsReport.SelectedItem is not ReportHospital hospital)
+            {
+                return;
+            }
+
+            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити лікаря {doctor.FullName}?", "Попередження", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+
+            string sql = @$"DELETE
+                      FROM REPORT_DOCTORS
+                    WHERE ID_REPORT_DOCTOR = {doctor.IdReportDoctor}";
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                return;
+            }
+
+            LoadDoctors(hospital.IdReportHospital);
+        }
+
+        private void ListDoctorsReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Btn_DeleteDoctor.IsEnabled = ListDoctorsReport.SelectedItem != null;
+        }
+
+        private void Btn_deleteReport_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListReports.SelectedItem is not Report report)
+            {
+                return;
+            }
+
+            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити звіт {report.ReportName}?", "Попередження", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+            string sql = $"DELETE FROM REPORTS WHERE ID_REPORT={report.IdReport}";
+
+            DBHelper.DoCommand(sql);
+
+            LoadReports();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace LenkasLittleHelper
 
         private const string Template = "template.xlsx";
 
-        public static void CreateReport_Fact(int idReport)
+        public static void CreateReport_Fact(int idReport, string fileName)
         {
             var days = LoadDays(idReport);
 
@@ -30,10 +30,15 @@ namespace LenkasLittleHelper
 
             using (var document = ExcelDocument.OpenFromTemplate(Template))
             {
+                if (document == null)
+                {
+                    return;
+                }
+
                 var cellFont = document.CreateFont();
 
                 cellFont.FontName = "Arial";
-                cellFont.FontHeightInPoints = 10;
+                cellFont.FontHeightInPoints = 9;
 
                 var cellStyle = document.CreateCellStyle();
                 cellStyle.SetFont(cellFont);
@@ -238,7 +243,7 @@ namespace LenkasLittleHelper
                     }
                 }
 
-                document.SaveAs(Path.Combine(Pathh, "Reports", $"new{DateTime.Now.Ticks}.xlsx"));
+                document.SaveAs(fileName);
             }
         }
 

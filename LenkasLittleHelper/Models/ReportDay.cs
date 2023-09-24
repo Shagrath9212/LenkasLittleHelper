@@ -3,7 +3,7 @@ using System;
 
 namespace LenkasLittleHelper.Models
 {
-    internal class ReportDay
+    public class ReportDay
     {
         public int IdReportDay { get; }
         public DateTime Day { get; }
