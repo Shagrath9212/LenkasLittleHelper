@@ -1,0 +1,71 @@
+﻿<Window x:Class="LenkasLittleHelper.Directories.WindowPharmacies"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Аптеки" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="35*"></ColumnDefinition>
+            <ColumnDefinition Width="65*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <ListView x:Name="ListCities" Height="Auto" Grid.Row="1" SelectionChanged="ListCities_SelectionChanged" ItemsSource="{Binding Cities}" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік міст">
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=CityTitleWithCount}" Header="Місто" Width="250"/>
+                    </GridView>
+
+                </ListView.View>
+            </ListView>
+        </Grid>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Row="0">
+                <Button Content="Додати аптеку..." x:Name="Btn_Add_Pharmacy" Click="Btn_Add_Pharmacy_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+                <Button Content="Редагувати..." x:Name="Btn_EditPharmacy" Click="Btn_EditPharmacy_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+                <Button Content="У архів" x:Name="Btn_ArchivePharmacy" Click="Btn_ArchivePharmacy_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+                <CheckBox Content="Показати архівні" x:Name="ShowArch_Pharmacies" Checked="ShowArch_Pharmacies_Checked" Unchecked="ShowArch_Pharmacies_Checked" Margin="0,8"></CheckBox>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Пошук..."></Label>
+                    <TextBox x:Name="SearchPharmacy" Width="100" TextChanged="SearchPharmacy_TextChanged" Margin="5"/>
+                </StackPanel>
+            </StackPanel>
+            <ListView x:Name="ListPharmacies" SelectionChanged="ListPharmacies_SelectionChanged" Height="Auto" Grid.Row="1">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="BorderBrush" Value="LightGray" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsArchived}"
+                    Value="True">
+                                <Setter Property="Background"
+                    Value="LightGray" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View>
+
+                    <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік аптек">
+
+                        <GridViewColumn x:Name="ColCity" DisplayMemberBinding="{Binding Path=City}" Width="0" Header="Місто"/>
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=FullName}" Header="Назва аптеки" Width="200"/>
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Address}" Header="Адреса" Width="200"/>
+                    </GridView>
+
+                </ListView.View>
+            </ListView>
+        </Grid>
+    </Grid>
+</Window>

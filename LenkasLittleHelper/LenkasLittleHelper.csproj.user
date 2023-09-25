@@ -9,31 +9,43 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Directories.xaml.cs">
+    <Compile Update="Windows\Directories\AddEditPharmacy.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Directory_AddEditDoctor.xaml.cs">
+    <Compile Update="Windows\Directories\HospitalsAndDoctors.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="EditHospital.xaml.cs">
+    <Compile Update="Windows\Directories\WindowPharmacies.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="ReportDay.xaml.cs">
+    <Compile Update="Directories_old.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="ReportEdit.xaml.cs">
+    <Compile Update="Windows\Directories\Directory.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="ReportHelper.xaml.cs">
+    <Compile Update="Windows\Directories\Directory_AddEditDoctor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="ReportWindows\Report_CityEdit.xaml.cs">
+    <Compile Update="Windows\Directories\EditHospital.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="ReportWindows\Report_DoctorNew.xaml.cs">
+    <Compile Update="Windows\Report\ReportDay.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Report_HospitalEdit.xaml.cs">
+    <Compile Update="Windows\Report\ReportEdit.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\Report\ReportHelper.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\Report\Report_CityEdit.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\Report\Report_DoctorNew.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\Report\Report_HospitalEdit.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -41,31 +53,43 @@
     <Page Update="Directories.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Directory_AddEditDoctor.xaml">
+    <Page Update="Windows\Directories\AddEditPharmacy.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="EditHospital.xaml">
+    <Page Update="Windows\Directories\Directory.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\Directories\HospitalsAndDoctors.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\Directories\Directory_AddEditDoctor.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\Directories\EditHospital.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\Directories\WindowPharmacies.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="ReportDay.xaml">
+    <Page Update="Windows\Report\ReportDay.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="ReportEdit.xaml">
+    <Page Update="Windows\Report\ReportEdit.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="ReportHelper.xaml">
+    <Page Update="Windows\Report\ReportHelper.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="ReportWindows\Report_CityEdit.xaml">
+    <Page Update="Windows\Report\Report_CityEdit.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="ReportWindows\Report_DoctorNew.xaml">
+    <Page Update="Windows\Report\Report_DoctorNew.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Report_HospitalEdit.xaml">
+    <Page Update="Windows\Report\Report_HospitalEdit.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

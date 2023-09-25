@@ -12,9 +12,12 @@ namespace LenkasLittleHelper
     {
         private int IdReport { get; set; }
         private Models.ReportDay? DayReport { get; }
-        public ReportDay(int idReport)
+        private MainEnv.ReportType ReportType { get; }
+
+        public ReportDay(int idReport, MainEnv.ReportType reportType)
         {
             InitializeComponent();
+            ReportType = reportType;
             IdReport = idReport;
         }
 
@@ -42,7 +45,8 @@ namespace LenkasLittleHelper
             if (DayReport == null)
             {
                 cmdParams.Add("idReport", IdReport);
-                sql = "INSERT INTO REPORT_DAYS (ID_REPORT,DAY) VALUES (@idReport,@dt)";
+                cmdParams.Add("reportType", (int)ReportType);
+                sql = "INSERT INTO REPORT_DAYS (ID_REPORT,DAY,REPORT_TYPE) VALUES (@idReport,@dt,@reportType)";
             }
             else
             {

@@ -17,8 +17,10 @@ namespace LenkasLittleHelper
         /// </summary>
         private void Btn_Directories_Click(object _sender, RoutedEventArgs _e)
         {
-            var directoriesPage = new Directories();
-            directoriesPage.Show();
+            var directory = new Directories.Directory();
+            directory.Show();
+            //var directoriesPage = new Directories_old();
+            //directoriesPage.Show();
         }
 
         private void Btn_Reports_Click(object sender, RoutedEventArgs e)

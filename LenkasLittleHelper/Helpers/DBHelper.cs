@@ -167,7 +167,7 @@ namespace LenkasLittleHelper.Database
 
                 return (T)Convert.ChangeType(resVal, type);
             }
-            else if (type == typeof(DateTime))
+            else if (type == typeof(DateTime) || type == typeof(DateTime?))
             {
                 if (Regex.IsMatch(value, "^[0-9]+$"))
                 {
@@ -188,6 +188,28 @@ namespace LenkasLittleHelper.Database
             }
 
             return (T)Convert.ChangeType(value, typeof(T));
+        }
+
+        public static T? GetEnum<T>(this SqliteDataReader reader, string column) where T : Enum
+        {
+            if (reader[column] is DBNull)
+            {
+                return default;
+            }
+
+            object val = reader[column];
+
+            if (!int.TryParse(val.ToString(), out int val2))
+            {
+                return default;
+            }
+
+            if (!Enum.IsDefined(typeof(T), val2))
+            {
+                return default;
+            }
+
+            return (T)(object)val2;
         }
     }
 }

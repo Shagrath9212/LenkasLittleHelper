@@ -30,8 +30,8 @@ namespace LenkasLittleHelper.Models
 
     public class Doctor_Directory : Doctor_Base
     {
-        public string PhoneNum { get; }
-        public string Category { get; }
+        public string? PhoneNum { get; }
+        public string? Category { get; }
         public bool Visitable { get; }
         public int IdSpeciality { get; }
         public int IdCategory { get; }
@@ -55,7 +55,7 @@ namespace LenkasLittleHelper.Models
             return idHospital;
         }
 
-        public Doctor_Directory(int idDoctor, string fullName, string speciality, string phoneNum, string street, string buildNumber, string category, bool visitable, int idSpeciality, int idCategory, int idAddress, string? city, string? nameHospital)
+        public Doctor_Directory(int idDoctor, string? fullName, string? speciality, string? phoneNum, string? street, string? buildNumber, string? category, bool visitable, int idSpeciality, int idCategory, int idAddress, string? city, string? nameHospital)
         {
             IdDoctor = idDoctor;
             FullName = fullName;

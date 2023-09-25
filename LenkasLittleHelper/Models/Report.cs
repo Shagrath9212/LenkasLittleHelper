@@ -9,6 +9,8 @@ namespace LenkasLittleHelper.Models
         public string? ReportName { get; }
         public DateTime DtReport { get; }
 
+        public MainEnv.ReportType ReportType { get; }
+
         public string ReportDate
         {
             get

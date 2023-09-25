@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Linq;
+using LenkasLittleHelper.Windows.Report;
+using static LenkasLittleHelper.MainEnv;
 
 namespace LenkasLittleHelper
 {
@@ -16,6 +18,7 @@ namespace LenkasLittleHelper
     {
         private ObservableCollection<Report> Reports { get; set; } = new();
         private ObservableCollection<Models.ReportDay> ReportsDays { get; set; } = new();
+        private ObservableCollection<Models.ReportDay> ReportsDays_Plan { get; set; } = new();
         private ObservableCollection<ReportCity> ReportsCities { get; set; } = new();
         private ObservableCollection<ReportHospital> ReportHospitals { get; set; } = new();
         private ObservableCollection<Doctor_Report> ReportDoctors { get; set; } = new();
@@ -25,8 +28,10 @@ namespace LenkasLittleHelper
         private void LevelOne()
         {
             ReportsDays.Clear();
+            ReportsDays_Plan.Clear();
             Btn_MakeExcel.IsEnabled = false;
             Btn_AddDate.IsEnabled = false;
+            Btn_AddDatePlan.IsEnabled = false;
         }
 
         private void LevelTwo()
@@ -34,7 +39,9 @@ namespace LenkasLittleHelper
             ReportsCities.Clear();
             Btn_AddCity.IsEnabled = false;
             Btn_EditDay.IsEnabled = false;
+            Btn_EditDayPlan.IsEnabled = false;
             Btn_DeleteDay.IsEnabled = false;
+            Btn_DeleteDayPlan.IsEnabled = false;
         }
         private void LevelThree()
         {
@@ -71,6 +78,7 @@ namespace LenkasLittleHelper
             InitializeComponent();
             ListReports.ItemsSource = Reports;
             ListDailyReports.ItemsSource = ReportsDays;
+            ListDailyReportsPlan.ItemsSource = ReportsDays_Plan;
             ListCitiesReport.ItemsSource = ReportsCities;
             ListHospitalsReport.ItemsSource = ReportHospitals;
             ListDoctorsReport.ItemsSource = ReportDoctors;
@@ -128,28 +136,84 @@ namespace LenkasLittleHelper
             if (report == null)
             {
                 Btn_AddDate.IsEnabled = false;
+                Btn_AddDatePlan.IsEnabled = false;
                 DisableNestedControls(1);
                 return;
             }
 
             Btn_AddDate.IsEnabled = true;
+            Btn_AddDatePlan.IsEnabled = true;
             Btn_MakeExcel.IsEnabled = true;
 
-            LoadDayReports(report.IdReport);
+            LoadDayReports_Fact(report.IdReport);
+            LoadDayReports_Plan(report.IdReport);
         }
         #endregion
 
         #region Дати
+        #region Факт
 
-        private void LoadDayReports(int idReport)
+        private bool TryAutofillDate(int idReport, ReportType reportType)
+        {
+            string getMaxDateSql = @$"SELECT
+                  MAX(day) MAX_DAY
+                FROM REPORT_DAYS
+                WHERE ID_REPORT = {idReport}
+                AND REPORT_TYPE = {(int)reportType}";
+
+            //при створенні нового дня-автоматично пропонується наступний день
+
+            var proposedDate = DateTime.MinValue;
+
+            DBHelper.ExecuteReader(getMaxDateSql, e =>
+            {
+                if (e.Read())
+                {
+                    proposedDate = e.GetValueOrDefault("MAX_DAY", DateTime.MinValue);
+                    if (proposedDate == DateTime.MinValue)
+                    {
+                        return;
+                    }
+
+                    proposedDate = proposedDate.Date.AddDays(1);
+                }
+            });
+
+            if (proposedDate != DateTime.MinValue)
+            {
+                var sql = $"INSERT INTO REPORT_DAYS (ID_REPORT,DAY,REPORT_TYPE) VALUES ({idReport},{proposedDate.Ticks + 1},{(int)reportType})";
+
+                var error = DBHelper.DoCommand(sql);
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    MessageBoxResult messageBoxResult = MessageBox.Show(error, "Попередження", MessageBoxButton.YesNo);
+                    return false;
+                }
+                if (reportType == ReportType.Fact)
+                {
+                    LoadDayReports_Fact(idReport);
+                }
+                else
+                {
+                    LoadDayReports_Plan(idReport);
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        private void LoadDayReports_Fact(int idReport)
         {
             ReportsDays.Clear();
 
             string sql = $@"SELECT
               ID_REPORT_DAY,
-              day
+              day,
+              REPORT_TYPE
             FROM REPORT_DAYS
-            WHERE ID_REPORT = {idReport} ORDER BY DAY";
+            WHERE ID_REPORT = {idReport} AND REPORT_TYPE={(int)MainEnv.ReportType.Fact} ORDER BY DAY";
 
             var error = DBHelper.ExecuteReader(sql, e =>
             {
@@ -157,6 +221,7 @@ namespace LenkasLittleHelper
                 {
                     int idReportDay = e.GetValueOrDefault<int>("ID_REPORT_DAY");
                     DateTime day = e.GetValueOrDefault<DateTime>("DAY");
+
                     ReportsDays.Add(new(idReportDay, day));
                 }
             });
@@ -175,19 +240,28 @@ namespace LenkasLittleHelper
 
             dt.Closed += (s, e) =>
             {
-                LoadDayReports(report.IdReport);
+                LoadDayReports_Fact(report.IdReport);
             };
         }
 
         private void Btn_AddDate_Click(object sender, RoutedEventArgs e)
         {
-            var reportCurrent = (Report)ListReports.SelectedItem;
-            var dt = new ReportDay(reportCurrent.IdReport);
+            if (ListReports.SelectedItem is not Report reportCurrent)
+            {
+                return;
+            }
+
+            if (TryAutofillDate(reportCurrent.IdReport, ReportType.Fact))
+            {
+                return;
+            }
+
+            ReportDay dt = new(reportCurrent.IdReport, ReportType.Fact);
             dt.Show();
 
             dt.Closed += (s, e) =>
             {
-                LoadDayReports(reportCurrent.IdReport);
+                LoadDayReports_Fact(reportCurrent.IdReport);
             };
         }
 
@@ -213,36 +287,122 @@ namespace LenkasLittleHelper
 
             if (ListReports.SelectedItem is Report report)
             {
-                LoadDayReports(report.IdReport);
+                LoadDayReports_Fact(report.IdReport);
             }
         }
 
         private void ListDailyReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var day = (Models.ReportDay)ListDailyReports.SelectedItem;
-
-            if (day == null)
+            if (ListDailyReports.SelectedItem is not Models.ReportDay day)
             {
-                Btn_AddCity.IsEnabled = false;
-                DisableNestedControls(2);
+                if (ListDailyReportsPlan.SelectedItem == null)
+                {
+                    Btn_AddCity.IsEnabled = false;
+                    DisableNestedControls(2);
+                    return;
+                }
                 return;
             }
 
             Btn_AddCity.IsEnabled = true;
             Btn_DeleteDay.IsEnabled = true;
+            Btn_DeleteDayPlan.IsEnabled = false;
             Btn_EditDay.IsEnabled = true;
+            Btn_EditDayPlan.IsEnabled = false;
+
+            ListDailyReportsPlan.UnselectAll();
+
             LoadCities(day.IdReportDay);
         }
+
+        #endregion
+
+        #region План
+
+        private void ListDailyReportsPlan_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ListDailyReportsPlan.SelectedItem is not Models.ReportDay day)
+            {
+                if (ListDailyReports.SelectedItem == null)
+                {
+                    Btn_AddCity.IsEnabled = false;
+                    DisableNestedControls(2);
+                    return;
+                }
+                return;
+            }
+
+            Btn_AddCity.IsEnabled = true;
+            Btn_DeleteDay.IsEnabled = false;
+            Btn_DeleteDayPlan.IsEnabled = true;
+            Btn_EditDay.IsEnabled = false;
+            Btn_EditDayPlan.IsEnabled = true;
+
+            ListDailyReports.UnselectAll();
+
+            LoadCities(day.IdReportDay);
+        }
+
+        private void LoadDayReports_Plan(int idReport)
+        {
+            ReportsDays_Plan.Clear();
+
+            string sql = $@"SELECT
+              ID_REPORT_DAY,
+              day,
+              REPORT_TYPE
+            FROM REPORT_DAYS
+            WHERE ID_REPORT = {idReport} AND REPORT_TYPE={(int)ReportType.Plan} ORDER BY DAY";
+
+            var error = DBHelper.ExecuteReader(sql, e =>
+            {
+                while (e.Read())
+                {
+                    int idReportDay = e.GetValueOrDefault<int>("ID_REPORT_DAY");
+                    DateTime day = e.GetValueOrDefault<DateTime>("DAY");
+
+                    ReportsDays_Plan.Add(new(idReportDay, day));
+                }
+            });
+        }
+
+        private void Btn_AddDatePlan_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListReports.SelectedItem is not Report reportCurrent)
+            {
+                return;
+            }
+
+            if (TryAutofillDate(reportCurrent.IdReport, ReportType.Plan))
+            {
+                return;
+            }
+
+            ReportDay dt = new(reportCurrent.IdReport, ReportType.Plan);
+            dt.Show();
+
+            dt.Closed += (s, e) =>
+            {
+                LoadDayReports_Plan(reportCurrent.IdReport);
+            };
+        }
+        #endregion
+
         #endregion
 
         #region Міста
         private void Btn_AddCity_Click(object sender, RoutedEventArgs e)
         {
-            var day = (Models.ReportDay)ListDailyReports.SelectedItem;
+            //var day = (Models.ReportDay)ListDailyReports.SelectedItem;
 
-            if (day == null)
+            if (ListReports.SelectedItem is not Models.ReportDay day)
             {
-                return;
+                if (ListDailyReportsPlan.SelectedItem is not Models.ReportDay day_)
+                {
+                    return;
+                }
+
+                day = day_;
             }
 
             var addCityDlg = new Report_CityEdit(day.IdReportDay, day.ReportDate_Str, ReportsCities.Select(e => e.Id));
@@ -309,7 +469,8 @@ namespace LenkasLittleHelper
             string sql = $@"SELECT
                           RH.ID_REPORT_HOSPITAL,
                           RH.ID_HOSPITAL,
-                          H.TITLE
+                          H.TITLE,
+                          (SELECT COUNT(1) FROM REPORT_DOCTORS WHERE ID_REPORT_HOSPITAL=RH.ID_REPORT_HOSPITAL) CNT_DOCTORS
                         FROM REPORT_HOSPITALS RH
                           LEFT JOIN HOSPITALS H
                             ON RH.ID_HOSPITAL = H.ID_HOSPITAL
@@ -323,8 +484,13 @@ namespace LenkasLittleHelper
                     int idReportHospital = e.GetValueOrDefault<int>("ID_REPORT_HOSPITAL");
                     int idHospital = e.GetValueOrDefault<int>("ID_HOSPITAL");
                     string? title = e.GetValueOrDefault<string>("TITLE");
+                    int countDoctors = e.GetValueOrDefault<int>("CNT_DOCTORS");
 
-                    ReportHospitals.Add(new ReportHospital(idReportHospital, idHospital, title));
+                    var hospital = new ReportHospital(idReportHospital, idHospital, title);
+
+                    hospital.UpdateCounter(countDoctors);
+
+                    ReportHospitals.Add(hospital);
                 }
             });
         }
@@ -342,7 +508,7 @@ namespace LenkasLittleHelper
 
             Btn_AddDoctor.IsEnabled = true;
             Btn_DeleteHospital.IsEnabled = true;
-            LoadDoctors(hospital.IdReportHospital);
+            LoadDoctors(hospital);
         }
 
         private void Btn_AddHospital_Click(object sender, RoutedEventArgs e)
@@ -384,7 +550,7 @@ namespace LenkasLittleHelper
         #endregion
 
         #region Лікарі
-        private void LoadDoctors(int idReportHospital)
+        private void LoadDoctors(ReportHospital hospital)
         {
             ReportDoctors.Clear();
 
@@ -402,7 +568,7 @@ namespace LenkasLittleHelper
                                 ON D.ID_ADDRESS = A.ID_ADDRESS
                               LEFT JOIN SPECIALITIES S
                                 ON D.SPECIALITY = S.ID_SPECIALITY
-                            WHERE RD.ID_REPORT_HOSPITAL = {idReportHospital}
+                            WHERE RD.ID_REPORT_HOSPITAL = {hospital.IdReportHospital}
                             ORDER BY ID_REPORT_DOCTOR DESC";
 
             DBHelper.ExecuteReader(sql, e =>
@@ -421,10 +587,7 @@ namespace LenkasLittleHelper
             });
             Doctors_DoctorsTotal.Content = $"Всього лікарів {ReportDoctors.Count}";
 
-            if (ListHospitalsReport.SelectedItem is not ReportHospital hospital)
-            {
-                return;
-            }
+            hospital.UpdateCounter(ReportDoctors.Count);
         }
 
         private void Btn_AddDoctor_Click(object sender, RoutedEventArgs e)
@@ -439,7 +602,7 @@ namespace LenkasLittleHelper
 
             reportEditDoctor.Closed += (s, e) =>
             {
-                LoadDoctors(hospital.IdReportHospital);
+                LoadDoctors(hospital);
             };
         }
         #endregion
@@ -453,10 +616,11 @@ namespace LenkasLittleHelper
                 return;
             }
 
-            Microsoft.Win32.SaveFileDialog saveFileDialog = new();
-
-            saveFileDialog.FileName = report.ReportName;
-            saveFileDialog.DefaultExt = ".xlsx";
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new()
+            {
+                FileName = report.ReportName,
+                DefaultExt = ".xlsx"
+            };
 
             bool? result = saveFileDialog.ShowDialog();
 
@@ -516,7 +680,7 @@ namespace LenkasLittleHelper
                 return;
             }
 
-            LoadDoctors(hospital.IdReportHospital);
+            LoadDoctors(hospital);
         }
 
         private void ListDoctorsReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -541,6 +705,16 @@ namespace LenkasLittleHelper
             DBHelper.DoCommand(sql);
 
             LoadReports();
+        }
+
+        private void Btn_EditDayPlan_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Btn_DeleteDayPlan_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

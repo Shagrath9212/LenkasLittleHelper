@@ -2,22 +2,18 @@
 using LenkasLittleHelper.Models;
 using System;
 using System.Collections.ObjectModel;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows;
 
-namespace LenkasLittleHelper
+namespace LenkasLittleHelper.Directories
 {
     /// <summary>
-    /// Interaction logic for Directories.xaml
+    /// Interaction logic for HospitalsAndDoctors.xaml
     /// </summary>
-    public partial class Directories : Window
+    public partial class HospitalsAndDoctors : Window
     {
-        public ObservableCollection<Hospital_Directories> Hospitals { get; } = new ObservableCollection<Hospital_Directories>();
-        private ObservableCollection<Doctor_Directory> Doctors { get; set; } = new ObservableCollection<Doctor_Directory>();
-
-        public Directories()
+        public HospitalsAndDoctors()
         {
             InitializeComponent();
 
@@ -25,6 +21,9 @@ namespace LenkasLittleHelper
             ListDoctors.ItemsSource = Doctors;
             InitHospitals();
         }
+
+        private ObservableCollection<Hospital_Directories> Hospitals { get; } = new ObservableCollection<Hospital_Directories>();
+        private ObservableCollection<Doctor_Directory> Doctors { get; } = new ObservableCollection<Doctor_Directory>();
 
         /// <summary>
         /// Метод для ініціалізації переліку лікарень
@@ -51,10 +50,10 @@ namespace LenkasLittleHelper
             {
                 while (e.Read())
                 {
-                    int idHospital = e.IsDBNull("ID_HOSPITAL") ? 0 : e.GetInt32("ID_HOSPITAL");
-                    string hospital = e.IsDBNull("TITLE") ? string.Empty : e.GetString("TITLE");
-                    string city = e.IsDBNull("CITY") ? string.Empty : e.GetString("CITY");
-                    int idCity = e.IsDBNull("ID_CITY") ? 0 : e.GetInt32("ID_CITY");
+                    int idHospital = e.GetValueOrDefault<int>("ID_HOSPITAL");
+                    var hospital = e.GetValueOrDefault<string>("TITLE");
+                    var city = e.GetValueOrDefault<string>("CITY");
+                    int idCity = e.GetValueOrDefault<int>("ID_CITY");
 
                     bool isArchived = e.GetValueOrDefault<bool>("IS_ARCHIVED");
 
@@ -194,15 +193,15 @@ namespace LenkasLittleHelper
             {
                 while (e.Read())
                 {
-                    int idDoctor = e.IsDBNull("ID_DOCTOR") ? 0 : e.GetInt32("ID_DOCTOR");
-                    string fullName = e.IsDBNull("FULL_NAME") ? string.Empty : e.GetString("FULL_NAME");
-                    string speciality = e.IsDBNull("NAME_SPECIALITY") ? string.Empty : e.GetString("NAME_SPECIALITY");
-                    string phoneNum = e.IsDBNull("PHONE_NUM") ? string.Empty : e.GetString("PHONE_NUM");
-                    string street = e.IsDBNull("STREET") ? string.Empty : e.GetString("STREET");
+                    int idDoctor = e.GetValueOrDefault<int>("ID_DOCTOR");
+                    var fullName = e.GetValueOrDefault<string>("FULL_NAME");
+                    var speciality = e.GetValueOrDefault<string>("NAME_SPECIALITY");
+                    var phoneNum = e.GetValueOrDefault<string>("PHONE_NUM");
+                    var street = e.GetValueOrDefault<string>("STREET");
                     string? city = e.GetValueOrDefault<string>("CITY");
                     string? nameHospital = e.GetValueOrDefault<string>("NAME_HOSPITAL");
-                    string buildNumber = e.IsDBNull("BUILD_NUMBER") ? string.Empty : e.GetString("BUILD_NUMBER");
-                    string category = e.IsDBNull("CATEGORY") ? string.Empty : e.GetString("CATEGORY");
+                    var buildNumber = e.GetValueOrDefault<string>("BUILD_NUMBER");
+                    var category = e.GetValueOrDefault<string>("CATEGORY");
                     bool visitable = e.GetValueOrDefault<bool>("VISITABLE");
 
                     int idSpecialiity = e.GetValueOrDefault<int>("SPECIALITY");
@@ -231,6 +230,8 @@ namespace LenkasLittleHelper
             {
                 Btn_EditHospital.IsEnabled = false;
                 Btn_DeleteHospital.IsEnabled = false;
+                Btn_Add_Doctor.IsEnabled = false;
+                Doctors.Clear();
                 return;
             }
 
@@ -238,6 +239,7 @@ namespace LenkasLittleHelper
 
             Btn_EditHospital.IsEnabled = !hospital.DoLoadAll;
             Btn_DeleteHospital.IsEnabled = !hospital.DoLoadAll;
+            Btn_Add_Doctor.IsEnabled = !hospital.DoLoadAll;
 
             SearchDoctor.Text = string.Empty;
             InitDoctors();

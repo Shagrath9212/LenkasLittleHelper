@@ -8,9 +8,8 @@ using System.Linq;
 using LenkasLittleHelper.Models;
 using NPOI.SS.UserModel;
 using System.Windows;
-using System.Windows.Data;
 
-namespace LenkasLittleHelper
+namespace LenkasLittleHelper.Windows.Report
 {
     internal static class MakeReport
     {
@@ -18,15 +17,21 @@ namespace LenkasLittleHelper
 
         private const string Template = "template.xlsx";
 
-        public static void CreateReport_Fact(int idReport, string fileName)
+        public static void CreateReport_Fact(int idReport, string? fileName)
         {
-            var days = LoadDays(idReport);
-
             if (!File.Exists(Template))
             {
                 MessageBox.Show($"Відсутній файл шаблону ({Template})", "Помилка!", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
+            if (string.IsNullOrEmpty(fileName))
+            {
+                MessageBox.Show("Не вказано ім'я файлу!", "Помилка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var days = LoadDays(idReport);
 
             using (var document = ExcelDocument.OpenFromTemplate(Template))
             {
@@ -64,7 +69,7 @@ namespace LenkasLittleHelper
                     rowCity.CreateCell(2).SetCellValue("Станіславчук Олена");
 
                     var cities = LoadCities(day.Key);
-                    if ((cities != null && !cities.Any()) || cities == null)
+                    if (cities != null && !cities.Any() || cities == null)
                     {
                         sheet.GetRow(rowStart).CreateCell(1).SetBlank();
                         sheet.GetRow(rowStart).CreateCell(3).SetBlank();
@@ -93,7 +98,7 @@ namespace LenkasLittleHelper
 
                         var hospitals = LoadHospitals(city.Key);
 
-                        if ((hospitals != null && !hospitals.Any()) || hospitals == null)
+                        if (hospitals != null && !hospitals.Any() || hospitals == null)
                         {
                             sheet.GetRow(rowStart).CreateCell(3).SetBlank();
                             sheet.GetRow(rowStart).CreateCell(4).SetBlank();
@@ -119,7 +124,7 @@ namespace LenkasLittleHelper
                                 sheet.CreateRow(rowStart += 1).CreateCell(3).SetCellValue(hospital.Value);
                             }
 
-                            IEnumerable<ReportBuilding> buildingsNDoctors = LoadBuildingsAndDoctors(hospital.Key);
+                            var buildingsNDoctors = LoadBuildingsAndDoctors(hospital.Key);
 
                             if (buildingsNDoctors == null || !buildingsNDoctors.Any())
                             {
@@ -303,7 +308,7 @@ namespace LenkasLittleHelper
                 while (e.Read())
                 {
                     int idReportDay = e.GetValueOrDefault<int>("ID_REPORT_DAY");
-                    DateTime day = e.GetValueOrDefault<DateTime>("DAY");
+                    var day = e.GetValueOrDefault<DateTime>("DAY");
                     days.Add(idReportDay, day);
                 }
             });
@@ -375,7 +380,7 @@ namespace LenkasLittleHelper
                     string? fullName = e.GetValueOrDefault<string>("FULL_NAME");
                     string? speciality = e.GetValueOrDefault<string>("NAME_SPECIALITY");
 
-                    if (!buildings.TryGetValue(idAddress, out ReportBuilding? building))
+                    if (!buildings.TryGetValue(idAddress, out var building))
                     {
                         building = new ReportBuilding(street, buildNumber);
                         buildings.Add(idAddress, building);

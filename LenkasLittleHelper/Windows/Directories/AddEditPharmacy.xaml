@@ -1,0 +1,50 @@
+﻿<Window x:Class="LenkasLittleHelper.Windows.Directories.AddEditPharmacy"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LenkasLittleHelper.Windows.Directories"
+        mc:Ignorable="d" Height="200" Width="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="5,0,5,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="4*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,0,5,0">
+                <Label Content="Місто"/>
+                <ComboBox x:Name="ListCities" Grid.Column="0"
+                    DisplayMemberPath="CityName"
+                        SelectedValuePath="CityName"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Grid.Column="1">
+                <Label Content="Назва аптеки"/>
+                <TextBox x:Name="FullName"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="5,0,5,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,0,5,0">
+                <Label Content="Вулиця"/>
+                <TextBox x:Name="Street"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Grid.Column="1">
+                <Label Content="Будинок"/>
+                <TextBox x:Name="Build"/>
+            </StackPanel>
+        </Grid>
+        
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="5">
+            <Button x:Name="PharmacyAdd" Click="PharmacyAdd_Click" Content="Зберегти"></Button>
+        </StackPanel>
+    </Grid>
+</Window>

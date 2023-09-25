@@ -1,0 +1,22 @@
+﻿<Window x:Class="LenkasLittleHelper.Directories.Directory"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LenkasLittleHelper.Directories"
+        mc:Ignorable="d"
+        Title="Довідники" Height="200" Width="300">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Лікарні та лікарі..." Click="ShowHospitalsAndDoctors" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
+                <Button Content="Аптеки..." Click="ShowPharmacies" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
+                <Button Content="Міста..." HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Спеціальності" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
+                <Button Content="Перелік адрес..." HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
