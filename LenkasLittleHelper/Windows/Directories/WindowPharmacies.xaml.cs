@@ -18,7 +18,7 @@ namespace LenkasLittleHelper.Directories
     public partial class WindowPharmacies : Window
     {
         private ObservableCollection<Models.City_Pharmacies> Cities { get; set; } = new();
-        private ObservableCollection<Models.Pharmacy> Pharmacies { get; set; } = new();
+        private ObservableCollection<Models.PharmacyDirectory> Pharmacies { get; set; } = new();
         public WindowPharmacies()
         {
             InitializeComponent();
@@ -94,7 +94,7 @@ namespace LenkasLittleHelper.Directories
                     string? build = e.GetValueOrDefault<string>("BUILD_NUM");
                     bool isArchived = e.GetValueOrDefault<bool>("IS_ARCHIVED");
 
-                    Pharmacies.Add(new Pharmacy(idPharmacy, nameCity, namePharmacy, street, build, isArchived));
+                    Pharmacies.Add(new PharmacyDirectory(idPharmacy, nameCity, namePharmacy, street, build, isArchived));
                 }
             });
         }
@@ -132,7 +132,7 @@ namespace LenkasLittleHelper.Directories
         {
             SearchPharmacy.Text = string.Empty;
 
-            if (ListPharmacies.SelectedItem is not Pharmacy pharmacy)
+            if (ListPharmacies.SelectedItem is not PharmacyDirectory pharmacy)
             {
                 Btn_EditPharmacy.IsEnabled = false;
                 Btn_ArchivePharmacy.IsEnabled = false;
@@ -202,7 +202,7 @@ namespace LenkasLittleHelper.Directories
 
         private void Btn_EditPharmacy_Click(object sender, RoutedEventArgs e)
         {
-            if (ListPharmacies.SelectedItem is not Pharmacy pharmacy || ListCities.SelectedItem is not Models.City_Pharmacies city)
+            if (ListPharmacies.SelectedItem is not PharmacyDirectory pharmacy || ListCities.SelectedItem is not Models.City_Pharmacies city)
             {
                 return;
             }
@@ -217,7 +217,7 @@ namespace LenkasLittleHelper.Directories
 
         private void Btn_ArchivePharmacy_Click(object sender, RoutedEventArgs e)
         {
-            if (ListPharmacies.SelectedItem is not Pharmacy pharmacy || ListCities.SelectedItem is not Models.City_Pharmacies city)
+            if (ListPharmacies.SelectedItem is not PharmacyDirectory pharmacy || ListCities.SelectedItem is not Models.City_Pharmacies city)
             {
                 return;
             }

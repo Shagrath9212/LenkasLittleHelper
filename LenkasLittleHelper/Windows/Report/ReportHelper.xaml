@@ -161,23 +161,24 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" Grid.Row="0">
-                    <Button Content="Додати аптеку..." x:Name="Btn_AddPharmacy" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
-                    <Button Content="Видалити аптеку..." x:Name="Btn_DeletePharmacy" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+                    <Button Content="Додати аптеку..." x:Name="Btn_AddPharmacy" Click="Btn_AddPharmacy_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+                    <Button Content="Видалити аптеку..." x:Name="Btn_DeletePharmacy" Click="Btn_DeletePharmacy_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
                 </StackPanel>
                 <ListView x:Name="ListPharmaciesReport" Height="Auto" Grid.Row="1">
                     <ListView.View>
 
                         <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік аптек">
 
-                            <GridViewColumn DisplayMemberBinding="{Binding Path=TitleWithCount}" Header="Назва" Width="200"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=FullName}" Header="Назва" Width="200"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=Address}" Header="Адреса" Width="200"/>
                         </GridView>
 
                     </ListView.View>
                 </ListView>
             </Grid>
             <StackPanel Orientation="Vertical" Grid.Row="2">
-                <Label x:Name="Hospital_HospitalsTotal" Content="1"></Label>
-                <Label x:Name="Hospital_DoctorsTotal" Content="2"></Label>
+                <Label x:Name="Hospital_HospitalsTotal"></Label>
+                <Label x:Name="Hospital_DoctorsTotal"></Label>
             </StackPanel>
         </Grid>
         <Grid Grid.Column="4">

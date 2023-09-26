@@ -21,6 +21,7 @@ namespace LenkasLittleHelper
         private ObservableCollection<Models.ReportDay> ReportsDays_Plan { get; set; } = new();
         private ObservableCollection<ReportCity> ReportsCities { get; set; } = new();
         private ObservableCollection<ReportHospital> ReportHospitals { get; set; } = new();
+        private ObservableCollection<PharmacyReport> ReportPharmacies { get; set; } = new();
         private ObservableCollection<Doctor_Report> ReportDoctors { get; set; } = new();
 
         private readonly Dictionary<int, Action> Controls = new();
@@ -46,7 +47,9 @@ namespace LenkasLittleHelper
         private void LevelThree()
         {
             ReportHospitals.Clear();
+            ReportPharmacies.Clear();
             Btn_AddHospital.IsEnabled = false;
+            Btn_AddPharmacy.IsEnabled = false;
             Btn_DeleteCity.IsEnabled = false;
         }
 
@@ -81,6 +84,7 @@ namespace LenkasLittleHelper
             ListDailyReportsPlan.ItemsSource = ReportsDays_Plan;
             ListCitiesReport.ItemsSource = ReportsCities;
             ListHospitalsReport.ItemsSource = ReportHospitals;
+            ListPharmaciesReport.ItemsSource = ReportPharmacies;
             ListDoctorsReport.ItemsSource = ReportDoctors;
             LoadReports();
 
@@ -386,6 +390,17 @@ namespace LenkasLittleHelper
                 LoadDayReports_Plan(reportCurrent.IdReport);
             };
         }
+
+        private void Btn_EditDayPlan_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Btn_DeleteDayPlan_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         #endregion
 
         #endregion
@@ -450,14 +465,17 @@ namespace LenkasLittleHelper
             if (city == null)
             {
                 Btn_AddHospital.IsEnabled = false;
+                Btn_AddPharmacy.IsEnabled = false;
                 Btn_DeleteCity.IsEnabled = false;
                 DisableNestedControls(3);
                 return;
             }
 
             Btn_AddHospital.IsEnabled = true;
+            Btn_AddPharmacy.IsEnabled = true;
             Btn_DeleteCity.IsEnabled = true;
             LoadHospitals(city.IdReportCity);
+            LoadPharmacies(city.IdReportCity);
         }
         #endregion
 
@@ -607,6 +625,60 @@ namespace LenkasLittleHelper
         }
         #endregion
 
+        #region Аптеки
+
+        private void LoadPharmacies(int idReportCity)
+        {
+            ReportPharmacies.Clear();
+
+            string sql = @$"SELECT
+              RP.ID_REPORT_PHARMACY,
+              RP.ID_PHARMACY,
+              P.NAME_PHARMACY,
+              P.STREET,
+              P.BUILD_NUM
+            FROM REPORT_PHARMACIES RP
+              LEFT JOIN PHARMACIES P
+                ON RP.ID_PHARMACY = P.ID_PHARMACY
+            WHERE RP.ID_REPORT_CITY = {idReportCity}";
+
+            DBHelper.ExecuteReader(sql, e =>
+            {
+                while (e.Read())
+                {
+                    int idReportPharmacy = e.GetValueOrDefault<int>("ID_REPORT_PHARMACY");
+                    int idPharmacy = e.GetValueOrDefault<int>("ID_PHARMACY");
+                    string? namePharmacy = e.GetValueOrDefault<string>("NAME_PHARMACY");
+                    string? street = e.GetValueOrDefault<string>("STREET");
+                    string? build = e.GetValueOrDefault<string>("BUILD_NUM");
+
+                    ReportPharmacies.Add(new PharmacyReport(idReportPharmacy, idPharmacy, namePharmacy, street, build));
+                }
+            });
+        }
+
+        private void Btn_AddPharmacy_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListCitiesReport.SelectedItem is not ReportCity city)
+            {
+                return;
+            }
+
+            var addPharmacy = new Report_AddEditPharmacy(city.Id, city.IdReportCity, ReportPharmacies.Select(e => e.IdPharmacy));
+
+            addPharmacy.Show();
+            addPharmacy.Closed += (s, e) =>
+            {
+                LoadPharmacies(city.IdReportCity);
+            };
+        }
+
+        private void Btn_DeletePharmacy_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
         private void Btn_MakeExcel_Click(object sender, RoutedEventArgs e)
         {
             var report = (Report)ListReports.SelectedItem;
@@ -705,16 +777,6 @@ namespace LenkasLittleHelper
             DBHelper.DoCommand(sql);
 
             LoadReports();
-        }
-
-        private void Btn_EditDayPlan_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void Btn_DeleteDayPlan_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

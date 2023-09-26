@@ -11,9 +11,9 @@ namespace LenkasLittleHelper.Windows.Directories
     /// </summary>
     public partial class AddEditPharmacy : Window
     {
-        private readonly Pharmacy? PharmacyCurrent;
+        private readonly PharmacyDirectory? PharmacyCurrent;
         private ObservableCollection<City> Cities { get; set; } = new();
-        public AddEditPharmacy(int idCity, Pharmacy pharmacyCurrent)
+        public AddEditPharmacy(int idCity, PharmacyDirectory pharmacyCurrent)
         {
             InitializeComponent();
 
