@@ -34,11 +34,26 @@
     public class ReportCity : City_Base
     {
         public int IdReportCity { get; }
+        public int CntDoctors { get => cntDoctors; private set => SetProperty(ref cntDoctors, value); }
+        public int cntDoctors;
+
+        public int CntPharmacies { get => cntPharmacies; private set => SetProperty(ref cntPharmacies, value); }
+        public int cntPharmacies;
+
+        public int CntHospitals { get => cntHospitals; private set => SetProperty(ref cntHospitals, value); }
+        public int cntHospitals;
         public ReportCity(int id, string? title, int idReportCity)
         {
             Id = id;
             CityName = title;
             IdReportCity = idReportCity;
+        }
+
+        public void UpdateCounter(int countDoctors, int countPharmacies, int countHospitals)
+        {
+            CntDoctors = countDoctors;
+            CntPharmacies = countPharmacies;
+            CntHospitals = countHospitals;
         }
     }
 }

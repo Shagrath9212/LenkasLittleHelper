@@ -8,6 +8,8 @@ using System.Windows.Controls;
 using System.Linq;
 using LenkasLittleHelper.Windows.Report;
 using static LenkasLittleHelper.MainEnv;
+using System.IO;
+using LenkasLittleHelper.Helpers;
 
 namespace LenkasLittleHelper
 {
@@ -58,7 +60,6 @@ namespace LenkasLittleHelper
             ReportDoctors.Clear();
             Btn_AddDoctor.IsEnabled = false;
             Btn_DeleteHospital.IsEnabled = false;
-            Doctors_DoctorsTotal.Content = null;
         }
 
         /// <summary>
@@ -301,12 +302,15 @@ namespace LenkasLittleHelper
             {
                 if (ListDailyReportsPlan.SelectedItem == null)
                 {
+                    ReportTypeLbl.Content = null;
                     Btn_AddCity.IsEnabled = false;
                     DisableNestedControls(2);
                     return;
                 }
                 return;
             }
+
+            ReportTypeLbl.Content = "!!!ФАКТ!!!";
 
             Btn_AddCity.IsEnabled = true;
             Btn_DeleteDay.IsEnabled = true;
@@ -329,6 +333,7 @@ namespace LenkasLittleHelper
             {
                 if (ListDailyReports.SelectedItem == null)
                 {
+                    ReportTypeLbl.Content = null;
                     Btn_AddCity.IsEnabled = false;
                     DisableNestedControls(2);
                     return;
@@ -341,6 +346,8 @@ namespace LenkasLittleHelper
             Btn_DeleteDayPlan.IsEnabled = true;
             Btn_EditDay.IsEnabled = false;
             Btn_EditDayPlan.IsEnabled = true;
+
+            ReportTypeLbl.Content = "!!!ПЛАН!!!";
 
             ListDailyReports.UnselectAll();
 
@@ -406,10 +413,80 @@ namespace LenkasLittleHelper
         #endregion
 
         #region Міста
+
+        /// <summary>
+        /// Оновлення кількості лікарів, аптек та лікарень напроти кожного міста зі звіту
+        /// </summary>
+        /// <param name="idReportDay">Ідентифікатор дня звіту</param>
+        private void LoadCitiesCount()
+        {
+            int idReportDay = -1;
+            if (ListDailyReports.SelectedItem is Models.ReportDay day)
+            {
+                idReportDay = day.IdReportDay;
+            }
+
+            if (idReportDay < 0)
+            {
+                if (ListDailyReportsPlan.SelectedItem is Models.ReportDay day_)
+                {
+                    idReportDay = day_.IdReportDay;
+                }
+            }
+
+            if (idReportDay < 0)
+            {
+                return;
+            }
+
+            string sql = @$"SELECT
+              ID_REPORT_CITY,
+              (SELECT
+                  COUNT(1)
+                FROM REPORT_HOSPITALS RH
+                  LEFT JOIN REPORT_DOCTORS RD
+                    ON RH.ID_REPORT_HOSPITAL = RD.ID_REPORT_HOSPITAL
+                WHERE RH.ID_REPORT_CITY = RC.ID_REPORT_CITY AND RD.ID_REPORT_DOCTOR IS NOT NULL) CNT_DOCTORS,
+              (SELECT
+                  COUNT(1)
+                FROM REPORT_PHARMACIES RP
+                WHERE RP.ID_REPORT_CITY = RC.ID_REPORT_CITY) CNT_PHARMACIES,
+              (SELECT
+                  COUNT(1)
+                FROM REPORT_HOSPITALS RH
+                WHERE RH.ID_REPORT_CITY = RC.ID_REPORT_CITY) CNT_HOSPITALS
+            FROM REPORT_CITIES RC
+            WHERE RC.ID_REPORT_DAY = {idReportDay}";
+
+            //Key-IdReportCity. Value (кортеж) 1-кількість лікарів, 2-кількість аптек, 3-кількість лікарень
+            Dictionary<int, (int, int, int)> counts = new();
+
+            var error = DBHelper.ExecuteReader(sql, e =>
+            {
+                while (e.Read())
+                {
+                    int idReportCity = e.GetValueOrDefault<int>("ID_REPORT_CITY");
+                    int countDoctors = e.GetValueOrDefault<int>("CNT_DOCTORS");
+                    int countPharmacies = e.GetValueOrDefault<int>("CNT_PHARMACIES");
+                    int countHospitals = e.GetValueOrDefault<int>("CNT_HOSPITALS");
+
+                    counts.TryAdd(idReportCity, (countDoctors, countPharmacies, countHospitals));
+                }
+            });
+
+            foreach (var city in ReportsCities)
+            {
+                if (!counts.TryGetValue(city.IdReportCity, out var counts_))
+                {
+                    city.UpdateCounter(0, 0, 0);
+                }
+
+                city.UpdateCounter(counts_.Item1, counts_.Item2, counts_.Item3);
+            }
+        }
+
         private void Btn_AddCity_Click(object sender, RoutedEventArgs e)
         {
-            //var day = (Models.ReportDay)ListDailyReports.SelectedItem;
-
             if (ListReports.SelectedItem is not Models.ReportDay day)
             {
                 if (ListDailyReportsPlan.SelectedItem is not Models.ReportDay day_)
@@ -457,6 +534,8 @@ namespace LenkasLittleHelper
                     ReportsCities.Add(new ReportCity(idCity, cityName, idReportCity));
                 }
             });
+
+            LoadCitiesCount();
         }
 
         private void ListCitiesReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -542,6 +621,7 @@ namespace LenkasLittleHelper
             hospitalEdit.Closed += (s, e) =>
             {
                 LoadHospitals(city.IdReportCity);
+                LoadCitiesCount();
             };
         }
 
@@ -564,6 +644,7 @@ namespace LenkasLittleHelper
             DBHelper.DoCommand(sql);
 
             ReportHospitals.Remove(hospital);
+            LoadCitiesCount();
         }
         #endregion
 
@@ -603,7 +684,6 @@ namespace LenkasLittleHelper
                     ReportDoctors.Add(new Doctor_Report(idReportDoctor, idDoctor, fullName, nameSpeciality, street, buildNumber));
                 }
             });
-            Doctors_DoctorsTotal.Content = $"Всього лікарів {ReportDoctors.Count}";
 
             hospital.UpdateCounter(ReportDoctors.Count);
         }
@@ -621,11 +701,17 @@ namespace LenkasLittleHelper
             reportEditDoctor.Closed += (s, e) =>
             {
                 LoadDoctors(hospital);
+                LoadCitiesCount();
             };
         }
         #endregion
 
         #region Аптеки
+
+        private void ListPharmaciesReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Btn_DeletePharmacy.IsEnabled = ListPharmaciesReport.SelectedItem != null;
+        }
 
         private void LoadPharmacies(int idReportCity)
         {
@@ -670,17 +756,49 @@ namespace LenkasLittleHelper
             addPharmacy.Closed += (s, e) =>
             {
                 LoadPharmacies(city.IdReportCity);
+                LoadCitiesCount();
             };
         }
 
         private void Btn_DeletePharmacy_Click(object sender, RoutedEventArgs e)
         {
+            if (ListPharmaciesReport.SelectedItem is not PharmacyReport pharmacyReport || ListCitiesReport.SelectedItem is not ReportCity city)
+            {
+                return;
+            }
 
+            string sql = $"DELETE FROM REPORT_PHARMACIES WHERE ID_REPORT_PHARMACY={pharmacyReport.IdReportPharmacy}";
+
+            DBHelper.DoCommand(sql);
+
+            LoadPharmacies(city.IdReportCity);
+
+            LoadCitiesCount();
         }
         #endregion
 
         private void Btn_MakeExcel_Click(object sender, RoutedEventArgs e)
         {
+
+            //if (!File.Exists(MakeReport.Template))
+            //{
+            //    MessageBox.Show($"Відсутній файл шаблону ({MakeReport.Template})", "Помилка!", MessageBoxButton.OK, MessageBoxImage.Error);
+            //    return;
+            //}
+
+            //using (ExcelDocument? document = ExcelDocument.OpenFromTemplate(MakeReport.Template))
+            //{
+            //    if (document == null)
+            //    {
+            //        return;
+            //    }
+
+            //    for (int i = 0; i <= document.NumberOfSheets; i++)
+            //    {
+
+            //    }
+            //}
+
             var report = (Report)ListReports.SelectedItem;
 
             if (report == null)
@@ -701,7 +819,7 @@ namespace LenkasLittleHelper
                 return;
             }
 
-            MakeReport.CreateReport_Fact(report.IdReport, saveFileDialog.FileName);
+            MakeReport.CreateReport(report.IdReport, saveFileDialog.FileName);
         }
 
         private void Btn_DeleteCity_Click(object sender, RoutedEventArgs e)
