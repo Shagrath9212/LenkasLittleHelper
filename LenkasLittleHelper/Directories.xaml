@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         WindowState="Maximized"
         mc:Ignorable="d"
-        Title="Довідники (лікарні та лікарі)" Height="450" Width="800">
+        Title="Довідники (лікарні та лікарі)" Height="450" Width="801">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="35*"></ColumnDefinition>
