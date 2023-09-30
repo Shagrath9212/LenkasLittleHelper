@@ -37,11 +37,13 @@ namespace LenkasLittleHelper.Directories
                     H.IS_ARCHIVED, 
                     C.TITLE CITY,
                     C.ID_CITY 
-                    FROM HOSPITALS H LEFT JOIN CITIES C ON H.ID_CITY=C.ID_CITY ");
+                    FROM HOSPITALS H 
+                        LEFT JOIN CITIES C 
+                    ON H.ID_CITY=C.ID_CITY ");
 
             if (!ShowArch.IsChecked ?? false)
             {
-                sqlHospitals.Append(" WHERE H.IS_ARCHIVED=0 ");
+                sqlHospitals.Append(" WHERE H.IS_ARCHIVED=0 AND C.IS_ARCHIVED=0");
             }
 
             sqlHospitals.Append("ORDER BY H.IS_ARCHIVED, C.TITLE");

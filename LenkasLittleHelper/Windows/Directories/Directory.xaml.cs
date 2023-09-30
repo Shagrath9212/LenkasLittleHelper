@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using LenkasLittleHelper.Windows.Directories;
+using System.Windows;
 
 namespace LenkasLittleHelper.Directories
 {
@@ -22,6 +23,12 @@ namespace LenkasLittleHelper.Directories
         {
             var pagePharmacies = new WindowPharmacies();
             pagePharmacies.Show();
+        }
+
+        private void Btn_Cities_Click(object sender, RoutedEventArgs e)
+        {
+            var wnd = new Cities();
+            wnd.Show();
         }
         #endregion
     }

@@ -8,8 +8,7 @@ using System.Windows.Controls;
 using System.Linq;
 using LenkasLittleHelper.Windows.Report;
 using static LenkasLittleHelper.MainEnv;
-using System.IO;
-using LenkasLittleHelper.Helpers;
+using System.Text;
 
 namespace LenkasLittleHelper
 {
@@ -142,6 +141,7 @@ namespace LenkasLittleHelper
             {
                 Btn_AddDate.IsEnabled = false;
                 Btn_AddDatePlan.IsEnabled = false;
+                Btn_MakeExcel.IsEnabled = false;
                 DisableNestedControls(1);
                 return;
             }
@@ -152,6 +152,205 @@ namespace LenkasLittleHelper
 
             LoadDayReports_Fact(report.IdReport);
             LoadDayReports_Plan(report.IdReport);
+        }
+
+        private void Btn_MakeExcel_Click(object sender, RoutedEventArgs e)
+        {
+            var report = (Report)ListReports.SelectedItem;
+
+            if (report == null)
+            {
+                return;
+            }
+
+
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new()
+            {
+                FileName = MakeReportFileName(report.IdReport),
+                DefaultExt = ".xlsx"
+            };
+
+            bool? result = saveFileDialog.ShowDialog();
+
+            if (!result.HasValue || !result.Value)
+            {
+                return;
+            }
+
+            MakeReport.CreateReport(report.IdReport, saveFileDialog.FileName);
+        }
+
+        /// <summary>
+        /// Створює назву файлу для звіту по шаблону Прізвище_Ім'я_Звіт_dd(start)_MM(start)_dd(end)_MM(end)_План_dd(start)_MM(start)_dd(end)_MM(end)
+        /// </summary>
+        /// <param name="idReport"></param>
+        private string MakeReportFileName(int idReport)
+        {
+            string sql = $@"SELECT 
+                  * 
+                FROM 
+                  (
+                    SELECT 
+                      MIN(RD.DAY) FACT_MIN, 
+                      MAX(RD.DAY) FACT_MAX 
+                    FROM 
+                      REPORT_DAYS RD 
+                    WHERE 
+                      ID_REPORT = {idReport} 
+                      AND REPORT_TYPE = {(int)ReportType.Fact}
+                  ), 
+                  (
+                    SELECT 
+                      MIN(RD.DAY) PLAN_MIN, 
+                      MAX(RD.DAY) PLAN_MAX 
+                    FROM 
+                      REPORT_DAYS RD 
+                    WHERE 
+                      ID_REPORT = {idReport} 
+                      AND REPORT_TYPE = {(int)ReportType.Plan}
+                  )
+                ";
+
+            StringBuilder fileName = new("Станіславчук Олена_Звіт_");
+
+            DBHelper.ExecuteReader(sql, e =>
+            {
+                if (e.Read())
+                {
+                    #region ФАКТ
+
+                    DateTime factMin = e.GetValueOrDefault("FACT_MIN", DateTime.MinValue);
+                    DateTime factMax = e.GetValueOrDefault("FACT_MAX", DateTime.MinValue);
+
+                    if (factMin == DateTime.MinValue || factMax == DateTime.MinValue)
+                    {
+                        MessageBox.Show("Не вказано дат для фактичних звітів, поправиш ім'я файлу.");
+                    }
+                    else
+                    {
+                        if (factMin.Day < 10)
+                        {
+                            fileName.Append($"0{factMin.Day}");
+                        }
+                        else
+                        {
+                            fileName.Append(factMin.Day);
+                        }
+
+                        fileName.Append('_');
+
+                        if (factMin.Month < 10)
+                        {
+                            fileName.Append($"0{factMin.Month}");
+                        }
+                        else
+                        {
+                            fileName.Append(factMin.Month);
+                        }
+
+                        fileName.Append('_');
+
+                        if (factMax.Day < 10)
+                        {
+                            fileName.Append($"0{factMax.Day}");
+                        }
+                        else
+                        {
+                            fileName.Append(factMax.Day);
+                        }
+
+                        fileName.Append('_');
+
+                        if (factMax.Month < 10)
+                        {
+                            fileName.Append($"0{factMax.Month}");
+                        }
+                        else
+                        {
+                            fileName.Append(factMax.Month);
+                        }
+
+                        fileName.Append('_');
+                    }
+                    #endregion
+
+                    #region ПЛАН
+                    DateTime planMin = e.GetValueOrDefault("PLAN_MIN", DateTime.MinValue);
+                    DateTime planMax = e.GetValueOrDefault("PLAN_MAX", DateTime.MinValue);
+
+                    if (planMin == DateTime.MinValue || planMax == DateTime.MinValue)
+                    {
+                        MessageBox.Show("Не вказано дат для планових звітів, поправиш ім'я файлу.");
+                    }
+                    else
+                    {
+                        fileName.Append("План_");
+                        if (planMin.Day < 10)
+                        {
+                            fileName.Append($"0{planMin.Day}");
+                        }
+                        else
+                        {
+                            fileName.Append(planMin.Day);
+                        }
+
+                        fileName.Append('_');
+
+                        if (planMin.Month < 10)
+                        {
+                            fileName.Append($"0{planMin.Month}");
+                        }
+                        else
+                        {
+                            fileName.Append(planMin.Month);
+                        }
+
+                        fileName.Append('_');
+
+                        if (planMax.Day < 10)
+                        {
+                            fileName.Append($"0{planMax.Day}");
+                        }
+                        else
+                        {
+                            fileName.Append(planMax.Day);
+                        }
+
+                        fileName.Append('_');
+
+                        if (planMax.Month < 10)
+                        {
+                            fileName.Append($"0{planMax.Month}");
+                        }
+                        else
+                        {
+                            fileName.Append(planMax.Month);
+                        }
+                    }
+                    #endregion
+                }
+            });
+
+            return fileName.ToString();
+        }
+
+        private void Btn_deleteReport_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListReports.SelectedItem is not Report report)
+            {
+                return;
+            }
+
+            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити звіт {report.ReportName}?", "Попередження", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+            string sql = $"DELETE FROM REPORTS WHERE ID_REPORT={report.IdReport}";
+
+            DBHelper.DoCommand(sql);
+
+            LoadReports();
         }
         #endregion
 
@@ -487,7 +686,7 @@ namespace LenkasLittleHelper
 
         private void Btn_AddCity_Click(object sender, RoutedEventArgs e)
         {
-            if (ListReports.SelectedItem is not Models.ReportDay day)
+            if (ListDailyReports.SelectedItem is not Models.ReportDay day)
             {
                 if (ListDailyReportsPlan.SelectedItem is not Models.ReportDay day_)
                 {
@@ -522,6 +721,7 @@ namespace LenkasLittleHelper
                   LEFT JOIN CITIES C
                     ON RC.ID_CITY = C.ID_CITY
                 WHERE RC.ID_REPORT_DAY = {idReportDay} 
+                    AND C.IS_ARCHIVED=0 
                     ORDER BY RC.ID_REPORT_CITY DESC";
 
             DBHelper.ExecuteReader(sql, e =>
@@ -555,6 +755,30 @@ namespace LenkasLittleHelper
             Btn_DeleteCity.IsEnabled = true;
             LoadHospitals(city.IdReportCity);
             LoadPharmacies(city.IdReportCity);
+        }
+
+        private void Btn_DeleteCity_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListCitiesReport.SelectedItem is not ReportCity city)
+            {
+                return;
+            }
+
+            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити усі записи по місту {city.CityName}?", "Попередження", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+            string sql = $@"DELETE
+                  FROM REPORT_CITIES
+                WHERE ID_REPORT_CITY = {city.IdReportCity}";
+
+            if (!string.IsNullOrEmpty(DBHelper.DoCommand(sql)))
+            {
+                return;
+            }
+
+            ReportsCities.Remove(city);
         }
         #endregion
 
@@ -704,6 +928,38 @@ namespace LenkasLittleHelper
                 LoadCitiesCount();
             };
         }
+
+        private void Btn_DeleteDoctor_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListDoctorsReport.SelectedItem is not Doctor_Report doctor
+                || ListHospitalsReport.SelectedItem is not ReportHospital hospital)
+            {
+                return;
+            }
+
+            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити лікаря {doctor.FullName}?", "Попередження", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+
+            string sql = @$"DELETE
+                      FROM REPORT_DOCTORS
+                    WHERE ID_REPORT_DOCTOR = {doctor.IdReportDoctor}";
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                return;
+            }
+
+            LoadDoctors(hospital);
+        }
+
+        private void ListDoctorsReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Btn_DeleteDoctor.IsEnabled = ListDoctorsReport.SelectedItem != null;
+        }
         #endregion
 
         #region Аптеки
@@ -776,125 +1032,5 @@ namespace LenkasLittleHelper
             LoadCitiesCount();
         }
         #endregion
-
-        private void Btn_MakeExcel_Click(object sender, RoutedEventArgs e)
-        {
-
-            //if (!File.Exists(MakeReport.Template))
-            //{
-            //    MessageBox.Show($"Відсутній файл шаблону ({MakeReport.Template})", "Помилка!", MessageBoxButton.OK, MessageBoxImage.Error);
-            //    return;
-            //}
-
-            //using (ExcelDocument? document = ExcelDocument.OpenFromTemplate(MakeReport.Template))
-            //{
-            //    if (document == null)
-            //    {
-            //        return;
-            //    }
-
-            //    for (int i = 0; i <= document.NumberOfSheets; i++)
-            //    {
-
-            //    }
-            //}
-
-            var report = (Report)ListReports.SelectedItem;
-
-            if (report == null)
-            {
-                return;
-            }
-
-            Microsoft.Win32.SaveFileDialog saveFileDialog = new()
-            {
-                FileName = report.ReportName,
-                DefaultExt = ".xlsx"
-            };
-
-            bool? result = saveFileDialog.ShowDialog();
-
-            if (!result.HasValue || !result.Value)
-            {
-                return;
-            }
-
-            MakeReport.CreateReport(report.IdReport, saveFileDialog.FileName);
-        }
-
-        private void Btn_DeleteCity_Click(object sender, RoutedEventArgs e)
-        {
-            if (ListCitiesReport.SelectedItem is not ReportCity city)
-            {
-                return;
-            }
-
-            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити усі записи по місту {city.CityName}?", "Попередження", MessageBoxButton.YesNo);
-            if (messageBoxResult == MessageBoxResult.No)
-            {
-                return;
-            }
-            string sql = $@"DELETE
-                  FROM REPORT_CITIES
-                WHERE ID_REPORT_CITY = {city.IdReportCity}";
-
-            if (!string.IsNullOrEmpty(DBHelper.DoCommand(sql)))
-            {
-                return;
-            }
-
-            ReportsCities.Remove(city);
-        }
-
-        private void Btn_DeleteDoctor_Click(object sender, RoutedEventArgs e)
-        {
-            if (ListDoctorsReport.SelectedItem is not Doctor_Report doctor
-                || ListHospitalsReport.SelectedItem is not ReportHospital hospital)
-            {
-                return;
-            }
-
-            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити лікаря {doctor.FullName}?", "Попередження", MessageBoxButton.YesNo);
-            if (messageBoxResult == MessageBoxResult.No)
-            {
-                return;
-            }
-
-            string sql = @$"DELETE
-                      FROM REPORT_DOCTORS
-                    WHERE ID_REPORT_DOCTOR = {doctor.IdReportDoctor}";
-            var error = DBHelper.DoCommand(sql);
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                return;
-            }
-
-            LoadDoctors(hospital);
-        }
-
-        private void ListDoctorsReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            Btn_DeleteDoctor.IsEnabled = ListDoctorsReport.SelectedItem != null;
-        }
-
-        private void Btn_deleteReport_Click(object sender, RoutedEventArgs e)
-        {
-            if (ListReports.SelectedItem is not Report report)
-            {
-                return;
-            }
-
-            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити звіт {report.ReportName}?", "Попередження", MessageBoxButton.YesNo);
-            if (messageBoxResult == MessageBoxResult.No)
-            {
-                return;
-            }
-            string sql = $"DELETE FROM REPORTS WHERE ID_REPORT={report.IdReport}";
-
-            DBHelper.DoCommand(sql);
-
-            LoadReports();
-        }
     }
 }

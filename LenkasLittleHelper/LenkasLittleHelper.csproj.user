@@ -9,7 +9,13 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Windows\Directories\AddEditCity.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Windows\Directories\AddEditPharmacy.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\Directories\Cities.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Windows\Directories\HospitalsAndDoctors.xaml.cs">
@@ -53,10 +59,16 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Directories.xaml">
+    <Page Update="Windows\Directories\AddEditCity.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="_Directories.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Windows\Directories\AddEditPharmacy.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\Directories\Cities.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Windows\Directories\Directory.xaml">

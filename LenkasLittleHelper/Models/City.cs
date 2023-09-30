@@ -15,6 +15,18 @@
         }
     }
 
+    public class City_Directory : City_Base
+    {
+        public bool IsArchived { get; }
+
+        public City_Directory(int id, string? cityName, bool isArchived)
+        {
+            Id = id;
+            CityName = cityName;
+            IsArchived = isArchived;
+        }
+    }
+
     public class City_Pharmacies : City_Base
     {
         public string? CityTitleWithCount { get => cityTitleWithCount; private set => SetProperty(ref cityTitleWithCount, value); }

@@ -1,0 +1,47 @@
+﻿<Window x:Class="LenkasLittleHelper.Windows.Directories.Cities"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LenkasLittleHelper.Windows.Directories"
+        mc:Ignorable="d"
+        Title="Cities" Height="450" Width="550">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="9*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <Button Content="Додати місто..." x:Name="Btn_Add_City" Click="Btn_Add_EditCity_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+            <Button Content="Редагувати..." x:Name="Btn_EditCity" Click="Btn_Add_EditCity_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+            <Button Content="У архів" x:Name="Btn_ArchiveCity" Click="Btn_ArchiveCity_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
+            <CheckBox Content="Показати архівні" x:Name="ShowArch_Cities" Checked="ShowArch_Cities_Checked" Unchecked="ShowArch_Cities_Checked" Margin="0,8"></CheckBox>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Пошук..."></Label>
+                <TextBox x:Name="SearchCity" Width="100" TextChanged="SearchCity_TextChanged" Margin="5"/>
+            </StackPanel>
+        </StackPanel>
+        <ListView x:Name="ListCities" Height="Auto" Grid.Row="1" SelectionChanged="ListCities_SelectionChanged" ItemsSource="{Binding Cities_Src}" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="BorderBrush" Value="LightGray" />
+                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsArchived}"
+                    Value="True">
+                            <Setter Property="Background"
+                    Value="LightGray" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік міст">
+
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=CityName}" Header="Місто" Width="550"/>
+                </GridView>
+
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>

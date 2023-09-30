@@ -54,7 +54,7 @@ namespace LenkasLittleHelper.Windows.Directories
 
         private void LoadCities()
         {
-            string sql = "SELECT ID_CITY, TITLE CITY_NAME FROM CITIES ORDER BY TITLE";
+            string sql = "SELECT ID_CITY, TITLE CITY_NAME FROM CITIES WHERE IS_ARCHIVED=0 ORDER BY TITLE";
 
             var error = DBHelper.ExecuteReader(sql, e =>
             {

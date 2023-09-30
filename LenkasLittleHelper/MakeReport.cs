@@ -48,20 +48,62 @@ namespace LenkasLittleHelper.Windows.Report
                 cellStyle.WrapText = true;
                 cellStyle.VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment.Center;
 
-                CreateReport_Doctors(document, cellStyle, idReport, MainEnv.ReportType.Fact);
-                CreateReport_Doctors(document, cellStyle, idReport, MainEnv.ReportType.Plan);
+                Dictionary<string, Action> actions = new()
+                {
+                    {"Лікарі факт", new Action(() =>
+                        {
+                            CreateReport_Doctors(document, cellStyle, idReport, ReportType.Fact);
+                        })
+                    },
+                    {"Лікарі план", new Action(() =>
+                        {
+                            CreateReport_Doctors(document, cellStyle, idReport, ReportType.Plan);
+                        })
+                    },
+                    {"Аптеки план", new Action(() =>
+                        {
+                            CreateReport_PharmaciesPlan(document, cellStyle, idReport);
+                        })
+                    },
+                    {"Аптеки факт", new Action(() =>
+                        {
+                            CreateReport_PharmaciesFact(document, cellStyle, idReport);
+                        })
+                    }
+                };
 
-                document.SaveAs(fileName);
+                foreach (var kv in actions)
+                {
+                    try
+                    {
+                        kv.Value();
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show($"Ти знаєш, до кого із цим звернутись... " +
+                            $"{Environment.NewLine} {e}",
+                            $"Помилка при генерації звіту {kv.Key}", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+
+                try
+                {
+                    document.SaveAs(fileName);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show($"Можливо, файл уже відкритий? {Environment.NewLine} {e}", "Помилка при збереженні файлу!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
-        public static void CreateReport_Doctors(ExcelDocument document, ICellStyle cellStyle, int idReport, MainEnv.ReportType reportType)
+        public static void CreateReport_Doctors(ExcelDocument document, ICellStyle cellStyle, int idReport, ReportType reportType)
         {
             var days = LoadDays(idReport, reportType);
 
             var rowStart = 0;
 
-            string sheetName = reportType == MainEnv.ReportType.Plan ? "План врачи" : "Факт врачи";
+            string sheetName = reportType == ReportType.Plan ? "План врачи" : "Факт врачи";
 
             var sheet = document.GetSheet(sheetName);
 
@@ -261,12 +303,16 @@ namespace LenkasLittleHelper.Windows.Report
             }
         }
 
+        #region Аптеки
+        /// <summary>
+        /// Формування звіту "План аптеки"
+        /// </summary>
         private static void CreateReport_PharmaciesPlan(ExcelDocument document, ICellStyle cellStyle, int idReport)
         {
-            int rowStart = 0;
-            var days = LoadDays(idReport, MainEnv.ReportType.Plan);
+            var sheet = document.GetSheet("План аптеки") ?? throw new Exception("У шаблоні відсутній лист План аптеки!");
 
-            var sheet = document.GetSheet("План аптеки");
+            int rowStart = 0;
+            var days = LoadDays(idReport, ReportType.Plan);
 
             foreach (var day in days)
             {
@@ -276,13 +322,12 @@ namespace LenkasLittleHelper.Windows.Report
 
                 rowCity.CreateCell(0).SetCellValue(day.Value.ToDBFormat_DateOnly());
 
-                rowCity.CreateCell(1).SetCellValue("Станіславчук Олена");
-
                 var cities = LoadPharmaciesCities(day.Key);
 
                 if (cities != null && !cities.Any() || cities == null)
                 {
                     sheet.GetRow(rowStart).CreateCell(1).SetBlank();
+                    sheet.GetRow(rowStart).CreateCell(2).SetBlank();
                     sheet.GetRow(rowStart).CreateCell(3).SetBlank();
                     sheet.GetRow(rowStart).CreateCell(4).SetBlank();
                     sheet.GetRow(rowStart).CreateCell(5).SetBlank();
@@ -291,6 +336,8 @@ namespace LenkasLittleHelper.Windows.Report
                     sheet.GetRow(rowStart).CreateCell(8).SetBlank();
                     continue;
                 }
+
+                rowCity.CreateCell(1).SetCellValue("Станіславчук Олена");
 
                 bool isCityFirstIteration = true;
 
@@ -312,7 +359,6 @@ namespace LenkasLittleHelper.Windows.Report
 
                     if (pharmacies != null && !pharmacies.Any() || pharmacies == null)
                     {
-                        sheet.GetRow(rowStart).CreateCell(1).SetBlank();
                         sheet.GetRow(rowStart).CreateCell(3).SetBlank();
                         sheet.GetRow(rowStart).CreateCell(4).SetBlank();
                         sheet.GetRow(rowStart).CreateCell(5).SetBlank();
@@ -335,6 +381,9 @@ namespace LenkasLittleHelper.Windows.Report
                             row.CreateCell(3).SetCellValue(pharmacy.Item1);
                             row.CreateCell(4).SetCellValue(pharmacy.Item2);
                             row.CreateCell(5).SetCellValue(pharmacy.Item3);
+                            row.CreateCell(6).SetBlank();
+                            row.CreateCell(7).SetBlank();
+                            row.CreateCell(8).SetBlank();
                             isPharmacyFirstIteration = false;
                         }
                         else
@@ -343,86 +392,167 @@ namespace LenkasLittleHelper.Windows.Report
                             row.CreateCell(3).SetCellValue(pharmacy.Item1);
                             row.CreateCell(4).SetCellValue(pharmacy.Item2);
                             row.CreateCell(5).SetCellValue(pharmacy.Item3);
+                            row.CreateCell(6).SetBlank();
+                            row.CreateCell(7).SetBlank();
+                            row.CreateCell(8).SetBlank();
                         }
+                    }
 
-                        //var buildingsNDoctors = LoadBuildingsAndDoctors(hospital.Key);
+                    if (sheet.LastRowNum - rowCityStart < 1)
+                    {
+                        continue;
+                    }
 
-                        //if (buildingsNDoctors == null || !buildingsNDoctors.Any())
-                        //{
-                        //    sheet.GetRow(rowStart).CreateCell(4).SetBlank();
-                        //    sheet.GetRow(rowStart).CreateCell(5).SetBlank();
-                        //    sheet.GetRow(rowStart).CreateCell(6).SetBlank();
-                        //    sheet.GetRow(rowStart).CreateCell(7).SetBlank();
-                        //    continue;
-                        //}
+                    CellRangeAddress craCity = new(rowCityStart, sheet.LastRowNum, 2, 2);
 
-                        //bool isBuildingFirstIteration = true;
+                    sheet.AddMergedRegion(craCity);
+                    sheet.SetCellRangeBorders(craCity);
+                }
 
-                        //foreach (var building in buildingsNDoctors)
-                        //{
-                        //    var rowBuildStart = rowStart + 1;
-                        //    if (isBuildingFirstIteration)
-                        //    {
-                        //        rowBuildStart -= 1;
-                        //        sheet.GetRow(rowStart).CreateCell(4).SetCellValue(building.Street);
-                        //        sheet.GetRow(rowStart).CreateCell(5).SetCellValue(building.NumBuilding);
-                        //        isBuildingFirstIteration = false;
-                        //    }
-                        //    else
-                        //    {
-                        //        var row = sheet.CreateRow(rowStart += 1);
-                        //        row.CreateCell(4).SetCellValue(building.Street);
-                        //        row.CreateCell(5).SetCellValue(building.NumBuilding);
-                        //    }
+                var rowSpanDay = sheet.LastRowNum - rowDayStart;
 
-                        //    bool isDoctorFirstIteration = true;
+                if (sheet.LastRowNum - rowDayStart < 1)
+                {
+                    continue;
+                }
 
-                        //    if (building.Doctors == null || !building.Doctors.Any())
-                        //    {
-                        //        sheet.GetRow(rowStart).CreateCell(6).SetBlank();
-                        //        sheet.GetRow(rowStart).CreateCell(7).SetBlank();
-                        //        continue;
-                        //    }
+                CellRangeAddress craDay = new(rowDayStart, sheet.LastRowNum, 0, 0);
 
-                        //    foreach (var doctor in building.Doctors)
-                        //    {
-                        //        if (isDoctorFirstIteration)
-                        //        {
-                        //            sheet.GetRow(rowStart).CreateCell(6).SetCellValue(doctor.Item1);
-                        //            sheet.GetRow(rowStart).CreateCell(7).SetCellValue(doctor.Item2);
-                        //            isDoctorFirstIteration = false;
-                        //        }
-                        //        else
-                        //        {
-                        //            var row = sheet.CreateRow(rowStart += 1);
-                        //            row.CreateCell(6).SetCellValue(doctor.Item1);
-                        //            row.CreateCell(7).SetCellValue(doctor.Item2);
-                        //        }
-                        //    }
+                sheet.AddMergedRegion(craDay);
+                sheet.SetCellRangeBorders(craDay);
 
-                        //    if (sheet.LastRowNum - rowBuildStart < 1)
-                        //    {
-                        //        continue;
-                        //    }
+                CellRangeAddress craLenka = new(rowDayStart, sheet.LastRowNum, 1, 1);
 
-                        //    CellRangeAddress craBuild = new(rowBuildStart, sheet.LastRowNum, 4, 4);
-                        //    sheet.AddMergedRegion(craBuild);
-                        //    sheet.SetCellRangeBorders(craBuild);
+                sheet.AddMergedRegion(craLenka);
+                sheet.SetCellRangeBorders(craLenka);
+            }
 
-                        //    CellRangeAddress craBuild2 = new(rowBuildStart, sheet.LastRowNum, 5, 5);
-                        //    sheet.AddMergedRegion(craBuild2);
-                        //    sheet.SetCellRangeBorders(craBuild2);
-                        //}
+            for (int i = 1; i < sheet.LastRowNum + 1; i++)
+            {
+                var row = sheet.GetRow(i);
 
-                        //if (sheet.LastRowNum - rowHospitalStart < 1)
-                        //{
-                        //    continue;
-                        //}
+                for (int cellStart = 8; cellStart <= 10; cellStart++)
+                {
+                    row.CreateCell(cellStart).SetBlank();
+                }
 
-                        //CellRangeAddress craHospital = new(rowHospitalStart, sheet.LastRowNum, 3, 3);
+                foreach (var cell in row.Cells)
+                {
+                    cell.CellStyle = cellStyle;
+                }
+            }
+        }
 
-                        //sheet.AddMergedRegion(craHospital);
-                        //sheet.SetCellRangeBorders(craHospital);
+        private static void CreateReport_PharmaciesFact(ExcelDocument document, ICellStyle cellStyle, int idReport)
+        {
+            var sheet = document.GetSheet("Факт аптеки") ?? throw new Exception("У шаблоні відсутній лист Факт аптеки!");
+
+            //Кількість клітинок (у подальшому там будуть створюватись порожні клітинки)
+            int cellCount = sheet.GetRow(0).Count();
+
+            int rowStart = 1;
+            var days = LoadDays(idReport, ReportType.Fact);
+
+            foreach (var day in days)
+            {
+                var rowDayStart = rowStart + 1;
+
+                sheet.CreateRow(rowStart += 1)
+                    .CreateCell(0)
+                    .SetCellValue("Станіславчук Олена");
+
+                sheet.GetRow(rowStart).CreateCell(6).SetCellValue(day.Value.ToDBFormat_DateOnly());
+
+                var cities = LoadPharmaciesCities(day.Key);
+
+                if (cities != null && !cities.Any() || cities == null)
+                {
+                    for (int i = 1; i < cellCount; i++)
+                    {
+                        //у 6 колонці знаходиться значення "Дата візиту". Додається вище
+                        if (i == 6)
+                        {
+                            continue;
+                        }
+                        sheet.GetRow(rowStart).CreateCell(i).SetBlank();
+                    }
+                    continue;
+                }
+
+                bool isCityFirstIteration = true;
+
+                foreach (var city in cities)
+                {
+                    var rowCityStart = rowStart + 1;
+                    if (isCityFirstIteration)
+                    {
+                        rowCityStart -= 1;
+                        sheet.GetRow(rowStart).CreateCell(1).SetCellValue(city.Value);
+                        isCityFirstIteration = false;
+                    }
+                    else
+                    {
+                        sheet.CreateRow(rowStart += 1).CreateCell(1).SetCellValue(city.Value);
+                    }
+
+                    var pharmacies = LoadPharmacies(city.Key);
+
+                    if (pharmacies != null && !pharmacies.Any() || pharmacies == null)
+                    {
+                        for (int i = 2; i < cellCount; i++)
+                        {
+                            //у 6 колонці знаходиться значення "Дата візиту". Додається вище
+                            if (i == 6)
+                            {
+                                continue;
+                            }
+                            sheet.GetRow(rowStart).CreateCell(i).SetBlank();
+                        }
+                        continue;
+                    }
+
+                    bool isPharmacyFirstIteration = true;
+
+                    foreach (var pharmacy in pharmacies)
+                    {
+                        var rowPharmacyStart = rowStart + 1;
+                        if (isPharmacyFirstIteration)
+                        {
+                            rowPharmacyStart -= 1;
+
+                            var row = sheet.GetRow(rowStart);
+                            row.CreateCell(2).SetCellValue(pharmacy.Item1);
+                            row.CreateCell(3).SetCellValue(pharmacy.Item2);
+                            row.CreateCell(4).SetCellValue(pharmacy.Item3);
+
+                            for (int i = 5; i < cellCount; i++)
+                            {
+                                //у 6 колонці знаходиться значення "Дата візиту". Додається вище
+                                if (i == 6)
+                                {
+                                    continue;
+                                }
+                                sheet.GetRow(rowStart).CreateCell(i).SetBlank();
+                            }
+                            isPharmacyFirstIteration = false;
+                        }
+                        else
+                        {
+                            var row = sheet.CreateRow(rowStart += 1);
+                            row.CreateCell(2).SetCellValue(pharmacy.Item1);
+                            row.CreateCell(3).SetCellValue(pharmacy.Item2);
+                            row.CreateCell(4).SetCellValue(pharmacy.Item3);
+
+                            for (int i = 5; i < cellCount; i++)
+                            {
+                                //у 6 колонці знаходиться значення "Дата візиту". Додається вище
+                                if (i == 6)
+                                {
+                                    continue;
+                                }
+                                sheet.GetRow(rowStart).CreateCell(i).SetBlank();
+                            }
+                        }
                     }
 
                     if (sheet.LastRowNum - rowCityStart < 1)
@@ -443,18 +573,34 @@ namespace LenkasLittleHelper.Windows.Report
                     continue;
                 }
 
-                CellRangeAddress craDay = new(rowDayStart, sheet.LastRowNum, 0, 0);
+                CellRangeAddress craDay = new(rowDayStart, sheet.LastRowNum, 6, 6);
 
                 sheet.AddMergedRegion(craDay);
                 sheet.SetCellRangeBorders(craDay);
 
-                CellRangeAddress craLenka = new(rowDayStart, sheet.LastRowNum, 2, 2);
+                CellRangeAddress craLenka = new(rowDayStart, sheet.LastRowNum, 0, 0);
 
                 sheet.AddMergedRegion(craLenka);
                 sheet.SetCellRangeBorders(craLenka);
             }
+
+            for (int i = 2; i < sheet.LastRowNum + 1; i++)
+            {
+                var row = sheet.GetRow(i);
+
+                //for (int cellStart = 8; cellStart <= 10; cellStart++)
+                //{
+                //    row.CreateCell(cellStart).SetBlank();
+                //}
+
+                foreach (var cell in row.Cells)
+                {
+                    cell.CellStyle = cellStyle;
+                }
+            }
         }
 
+        #endregion
         /// <summary>
         /// Лікарі (факт)
         /// </summary>
@@ -760,9 +906,9 @@ namespace LenkasLittleHelper.Windows.Report
                 FROM REPORT_CITIES RC
                   LEFT JOIN REPORT_PHARMACIES RP
                     ON RC.ID_REPORT_CITY = RP.ID_REPORT_CITY
-                    WHERE RC.ID_REPORT_DAY={idReportDay}
                   LEFT JOIN CITIES C
                     ON RC.ID_CITY = C.ID_CITY
+                 WHERE RC.ID_REPORT_DAY={idReportDay}
                 GROUP BY RC.ID_REPORT_CITY
                 HAVING COUNT(RP.ID_REPORT_CITY) > 0";
 
@@ -781,6 +927,11 @@ namespace LenkasLittleHelper.Windows.Report
             return ret;
         }
 
+        /// <summary>
+        /// Item1-назва аптеки, Item2-вулиця, Item3-номер будинку
+        /// </summary>
+        /// <param name="idReportCity"></param>
+        /// <returns></returns>
         private static IReadOnlyList<(string?, string?, string?)> LoadPharmacies(int idReportCity)
         {
             List<(string?, string?, string?)> ret = new();
