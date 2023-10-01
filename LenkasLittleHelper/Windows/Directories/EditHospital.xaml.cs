@@ -1,5 +1,6 @@
 ﻿using LenkasLittleHelper.Database;
 using LenkasLittleHelper.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -15,7 +16,7 @@ namespace LenkasLittleHelper
     {
         public ObservableCollection<City> Cities { get; } = new();
 
-        private Hospital_Directories? hospitalCurr { get; set; }
+        private Hospital_Directories? HospitalCurr { get; set; }
 
         private void Init()
         {
@@ -33,7 +34,7 @@ namespace LenkasLittleHelper
 
         public EditHospital(Hospital_Directories hospital)
         {
-            hospitalCurr = hospital;
+            HospitalCurr = hospital;
             Init();
 
             SetCitySelected(hospital.IdCity);
@@ -73,6 +74,11 @@ namespace LenkasLittleHelper
                     Cities.Add(new City(idCity, city));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void ListCities_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -106,23 +112,27 @@ namespace LenkasLittleHelper
                     {"nameCity",CityNameCustom.Text }
                 };
 
-                var error = DBHelper.DoCommand(addCitySql, cmdParams);
+                var err = DBHelper.DoCommand(addCitySql, cmdParams);
 
-                if (!string.IsNullOrEmpty(error))
+                if (!string.IsNullOrEmpty(err))
                 {
-                    MessageBox.Show(error, "Помилка!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    MainEnv.ShowErrorDlg(err);
                 }
 
                 string getLastId = "SELECT ID_CITY FROM CITIES ORDER BY ID_CITY DESC";
 
-                DBHelper.ExecuteReader(getLastId, e =>
+                var err2 = DBHelper.ExecuteReader(getLastId, e =>
                 {
                     if (e.Read())
                     {
                         idCity = e.GetValueOrDefault("ID_CITY", idCity);
                     }
                 });
+
+                if (!string.IsNullOrEmpty(err2))
+                {
+                    MainEnv.ShowErrorDlg(err2);
+                }
             }
 
             var hospitalsCmdParams = new Dictionary<string, object>
@@ -131,19 +141,25 @@ namespace LenkasLittleHelper
                 { "idCity", idCity }
             };
 
-            if (hospitalCurr != null)
+            if (HospitalCurr != null)
             {
                 sql = $@"UPDATE HOSPITALS SET ID_CITY=@idCity, TITLE=@title
-                            WHERE ID_HOSPITAL={hospitalCurr.IdHospital}";
+                            WHERE ID_HOSPITAL={HospitalCurr.IdHospital}";
             }
             else
             {
                 sql = "INSERT INTO HOSPITALS (TITLE,ID_CITY) VALUES (@title,@idCity)";
             }
 
-            DBHelper.DoCommand(sql, hospitalsCmdParams);
+            var error = DBHelper.DoCommand(sql, hospitalsCmdParams);
 
-            this.Close();
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+                return;
+            }
+
+            Close();
         }
     }
 }

@@ -39,7 +39,7 @@ namespace LenkasLittleHelper.Windows.Report
                     AND IS_ARCHIVED = 0
                     AND ID_PHARMACY NOT IN({string.Join(',', existing)})";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -51,6 +51,11 @@ namespace LenkasLittleHelper.Windows.Report
                     Pharmacies.Add(new Pharmacy(idPharmacy, namePharmacy, street, build));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void Pharmacies_Save_Click(object sender, RoutedEventArgs e)
@@ -72,7 +77,7 @@ namespace LenkasLittleHelper.Windows.Report
 
                 if (!string.IsNullOrEmpty(error))
                 {
-
+                    MainEnv.ShowErrorDlg(error);
                 }
             }
 

@@ -44,7 +44,7 @@ namespace LenkasLittleHelper.Directories
                 FROM CITIES C
                 ORDER BY C.TITLE";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -59,6 +59,11 @@ namespace LenkasLittleHelper.Directories
                     Cities.Add(city);
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void LoadPharmacies(int idCity)
@@ -83,7 +88,7 @@ namespace LenkasLittleHelper.Directories
 
             sql.Append(" ORDER BY NAME_PHARMACY");
 
-            DBHelper.ExecuteReader(sql.ToString(), e =>
+            var error = DBHelper.ExecuteReader(sql.ToString(), e =>
             {
                 while (e.Read())
                 {
@@ -97,6 +102,11 @@ namespace LenkasLittleHelper.Directories
                     Pharmacies.Add(new PharmacyDirectory(idPharmacy, nameCity, namePharmacy, street, build, isArchived));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void ListCities_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -175,7 +185,7 @@ namespace LenkasLittleHelper.Directories
 
             Dictionary<int, int> citiesAndPharmaciesCount = new();
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -185,6 +195,12 @@ namespace LenkasLittleHelper.Directories
                     citiesAndPharmaciesCount.TryAdd(idCty, count);
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+                return;
+            }
 
             foreach (var city in Cities)
             {
@@ -228,7 +244,13 @@ namespace LenkasLittleHelper.Directories
                     SET IS_ARCHIVED = {signArchived}
                     WHERE ID_PHARMACY = {pharmacy.IdPharmacy}";
 
-            DBHelper.DoCommand(sql);
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
+
             LoadPharmacies(city.Id);
             ReinitCountPharmacies(city);
         }

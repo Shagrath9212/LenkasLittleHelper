@@ -30,6 +30,12 @@ namespace LenkasLittleHelper.Directories
             var wnd = new Cities();
             wnd.Show();
         }
+
+        private void Btn_Specialities_Click(object sender, RoutedEventArgs e)
+        {
+            var wnd = new Specialities();
+            wnd.Show();
+        }
         #endregion
     }
 }

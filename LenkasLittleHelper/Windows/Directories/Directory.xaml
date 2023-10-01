@@ -14,8 +14,8 @@
                 <Button Content="Міста..." Click="Btn_Cities_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Button Content="Спеціальності" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
-                <Button Content="Перелік адрес..." HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
+                <Button Content="Спеціальності..." Click="Btn_Specialities_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>
+                <!--<Button Content="Перелік адрес..." HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,5,0"/>-->
             </StackPanel>
         </StackPanel>
     </Grid>

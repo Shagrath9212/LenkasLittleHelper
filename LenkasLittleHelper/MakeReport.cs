@@ -847,13 +847,18 @@ namespace LenkasLittleHelper.Windows.Report
 
             Dictionary<int, string?>? cities = new();
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
                     cities.Add(e.GetValueOrDefault<int>("ID_REPORT_CITY"), e.GetValueOrDefault<string>("TITLE"));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
 
             return cities;
         }
@@ -869,7 +874,7 @@ namespace LenkasLittleHelper.Windows.Report
 
             Dictionary<int, string?>? hospitals = new();
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -877,16 +882,21 @@ namespace LenkasLittleHelper.Windows.Report
                 }
             });
 
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDlg(error);
+            }
+
             return hospitals;
         }
 
-        private static Dictionary<int, DateTime> LoadDays(int idReport, MainEnv.ReportType reportType)
+        private static Dictionary<int, DateTime> LoadDays(int idReport, ReportType reportType)
         {
             string sql = $"SELECT ID_REPORT_DAY, DAY FROM REPORT_DAYS WHERE ID_REPORT={idReport} AND REPORT_TYPE={(int)reportType} ORDER BY DAY";
 
             var days = new Dictionary<int, DateTime>();
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -895,6 +905,12 @@ namespace LenkasLittleHelper.Windows.Report
                     days.Add(idReportDay, day);
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDlg(error);
+            }
+
             return days;
         }
 
@@ -914,7 +930,7 @@ namespace LenkasLittleHelper.Windows.Report
 
             var ret = new Dictionary<int, string?>();
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -923,6 +939,11 @@ namespace LenkasLittleHelper.Windows.Report
                     _ = ret.TryAdd(idReportCity, nameCity);
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
 
             return ret;
         }
@@ -945,7 +966,7 @@ namespace LenkasLittleHelper.Windows.Report
                 ON RP.ID_PHARMACY = P.ID_PHARMACY
             WHERE RP.ID_REPORT_CITY = {idReportCity}";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -956,6 +977,11 @@ namespace LenkasLittleHelper.Windows.Report
                     ret.Add((namePharmacy, street, buildNum));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDlg(error);
+            }
 
             return ret;
         }
@@ -975,7 +1001,7 @@ namespace LenkasLittleHelper.Windows.Report
 
             Dictionary<int, List<(string?, string?)>> buildings = new();
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -992,6 +1018,11 @@ namespace LenkasLittleHelper.Windows.Report
                     doctors.Add((fullName, speciality));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDlg(error);
+            }
 
             return buildings;
         }
@@ -1014,7 +1045,7 @@ namespace LenkasLittleHelper.Windows.Report
 
             Dictionary<int, ReportBuilding> buildings = new();
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -1029,14 +1060,16 @@ namespace LenkasLittleHelper.Windows.Report
                     {
                         building = new ReportBuilding(street, buildNumber);
                         buildings.Add(idAddress, building);
-                        //doctors = new List<(string?, string?)>();
-                        //buildings.Add(idAddress, doctors);
                     }
 
                     building.AddDoctor(fullName, speciality);
-                    //doctors.Add((fullName, speciality));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDlg(error);
+            }
 
             return buildings.Values;
         }

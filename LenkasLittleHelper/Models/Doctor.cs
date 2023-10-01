@@ -39,12 +39,14 @@ namespace LenkasLittleHelper.Models
         public string? City { get; }
         public string? NameHospital { get; }
 
+        public bool IsArchived { get; }
+
         public int GetIDHospital()
         {
             string sql = $"SELECT A.ID_HOSPITAL FROM DOCTORS D LEFT JOIN ADDRESSES A ON D.ID_ADDRESS=A.ID_ADDRESS WHERE D.ID_DOCTOR={IdDoctor}";
 
             int idHospital = -1;
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 if (e.Read())
                 {
@@ -52,10 +54,15 @@ namespace LenkasLittleHelper.Models
                 }
             });
 
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
+
             return idHospital;
         }
 
-        public Doctor_Directory(int idDoctor, string? fullName, string? speciality, string? phoneNum, string? street, string? buildNumber, string? category, bool visitable, int idSpeciality, int idCategory, int idAddress, string? city, string? nameHospital)
+        public Doctor_Directory(int idDoctor, string? fullName, string? speciality, string? phoneNum, string? street, string? buildNumber, string? category, bool visitable, int idSpeciality, int idCategory, int idAddress, string? city, string? nameHospital, bool isArchived)
         {
             IdDoctor = idDoctor;
             FullName = fullName;
@@ -70,6 +77,7 @@ namespace LenkasLittleHelper.Models
             IdAddress = idAddress;
             City = city;
             NameHospital = nameHospital;
+            IsArchived = isArchived;
         }
     }
 

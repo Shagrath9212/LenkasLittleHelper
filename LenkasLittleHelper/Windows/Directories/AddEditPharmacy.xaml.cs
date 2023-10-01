@@ -66,6 +66,11 @@ namespace LenkasLittleHelper.Windows.Directories
                     Cities.Add(new City(idCity, city));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void PharmacyAdd_Click(object sender, RoutedEventArgs e)

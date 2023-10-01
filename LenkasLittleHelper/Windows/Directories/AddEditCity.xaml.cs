@@ -1,5 +1,6 @@
 ﻿using LenkasLittleHelper.Database;
 using LenkasLittleHelper.Models;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 
@@ -40,7 +41,12 @@ namespace LenkasLittleHelper.Windows.Directories
             if (CityCurrent != null)
             {
                 string sql = $"UPDATE CITIES SET TITLE=@title WHERE ID_CITY={CityCurrent.Id}";
-                DBHelper.DoCommand(sql);
+                var err = DBHelper.DoCommand(sql);
+
+                if (!string.IsNullOrEmpty(err))
+                {
+                    MainEnv.ShowErrorDlg(err);
+                }
                 Close();
                 return;
             }
@@ -49,7 +55,7 @@ namespace LenkasLittleHelper.Windows.Directories
 
             List<City_Directory> existingCities = new();
 
-            DBHelper.ExecuteReader(citiesAllSql, e =>
+            var error = DBHelper.ExecuteReader(citiesAllSql, e =>
             {
                 while (e.Read())
                 {
@@ -60,6 +66,11 @@ namespace LenkasLittleHelper.Windows.Directories
                     existingCities.Add(new City_Directory(idCity, title, isArchived));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
 
             string addCitySql = "INSERT INTO CITIES(TITLE) VALUES (@title)";
 
@@ -80,7 +91,14 @@ namespace LenkasLittleHelper.Windows.Directories
                 }
             }
 
-            var error = DBHelper.DoCommand(addCitySql, cmdParams);
+            error = DBHelper.DoCommand(addCitySql, cmdParams);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+                return;
+            }
+
             Close();
         }
     }

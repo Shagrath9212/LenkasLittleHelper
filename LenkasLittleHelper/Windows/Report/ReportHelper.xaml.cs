@@ -121,6 +121,11 @@ namespace LenkasLittleHelper
                     Reports.Add(new Report(idReport, reportTitle, dtCreate));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void Btn_AddReport_Click(object sender, RoutedEventArgs e)
@@ -184,7 +189,7 @@ namespace LenkasLittleHelper
         /// Створює назву файлу для звіту по шаблону Прізвище_Ім'я_Звіт_dd(start)_MM(start)_dd(end)_MM(end)_План_dd(start)_MM(start)_dd(end)_MM(end)
         /// </summary>
         /// <param name="idReport"></param>
-        private string MakeReportFileName(int idReport)
+        private static string MakeReportFileName(int idReport)
         {
             string sql = $@"SELECT 
                   * 
@@ -213,7 +218,7 @@ namespace LenkasLittleHelper
 
             StringBuilder fileName = new("Станіславчук Олена_Звіт_");
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 if (e.Read())
                 {
@@ -331,6 +336,11 @@ namespace LenkasLittleHelper
                 }
             });
 
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDlg(error);
+            }
+
             return fileName.ToString();
         }
 
@@ -348,7 +358,12 @@ namespace LenkasLittleHelper
             }
             string sql = $"DELETE FROM REPORTS WHERE ID_REPORT={report.IdReport}";
 
-            DBHelper.DoCommand(sql);
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
 
             LoadReports();
         }
@@ -369,7 +384,7 @@ namespace LenkasLittleHelper
 
             var proposedDate = DateTime.MinValue;
 
-            DBHelper.ExecuteReader(getMaxDateSql, e =>
+            var error = DBHelper.ExecuteReader(getMaxDateSql, e =>
             {
                 if (e.Read())
                 {
@@ -383,15 +398,20 @@ namespace LenkasLittleHelper
                 }
             });
 
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
+
             if (proposedDate != DateTime.MinValue)
             {
                 var sql = $"INSERT INTO REPORT_DAYS (ID_REPORT,DAY,REPORT_TYPE) VALUES ({idReport},{proposedDate.Ticks + 1},{(int)reportType})";
 
-                var error = DBHelper.DoCommand(sql);
+                error = DBHelper.DoCommand(sql);
 
                 if (!string.IsNullOrEmpty(error))
                 {
-                    MessageBoxResult messageBoxResult = MessageBox.Show(error, "Попередження", MessageBoxButton.YesNo);
+                    MainEnv.ShowErrorDlg(error);
                     return false;
                 }
                 if (reportType == ReportType.Fact)
@@ -599,12 +619,45 @@ namespace LenkasLittleHelper
 
         private void Btn_EditDayPlan_Click(object sender, RoutedEventArgs e)
         {
+            if (ListDailyReportsPlan.SelectedItem is not Models.ReportDay day
+                || ListReports.SelectedItem is not Report report)
+            {
+                return;
+            }
 
+            var dt = new ReportDay(day);
+            dt.Show();
+
+            dt.Closed += (s, e) =>
+            {
+                LoadDayReports_Plan(report.IdReport);
+            };
         }
 
         private void Btn_DeleteDayPlan_Click(object sender, RoutedEventArgs e)
         {
+            if (ListDailyReportsPlan.SelectedItem is not Models.ReportDay day)
+            {
+                return;
+            }
+            MessageBoxResult messageBoxResult = MessageBox.Show($"Видалити усі записи на дату {day.ReportDate_Str}?", "Попередження", MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+            string sql = $"DELETE FROM REPORT_DAYS WHERE ID_REPORT_DAY={day.IdReportDay}";
 
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MessageBox.Show(error, "Помилка при видаленні!", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+            if (ListDailyReportsPlan.SelectedItem is Report report)
+            {
+                LoadDayReports_Plan(report.IdReport);
+            }
         }
 
         #endregion
@@ -724,7 +777,7 @@ namespace LenkasLittleHelper
                     AND C.IS_ARCHIVED=0 
                     ORDER BY RC.ID_REPORT_CITY DESC";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -734,6 +787,11 @@ namespace LenkasLittleHelper
                     ReportsCities.Add(new ReportCity(idCity, cityName, idReportCity));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
 
             LoadCitiesCount();
         }
@@ -798,7 +856,7 @@ namespace LenkasLittleHelper
                         WHERE RH.ID_REPORT_CITY = {idReportCity}
                         ORDER BY RH.ID_REPORT_HOSPITAL DESC";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -814,6 +872,11 @@ namespace LenkasLittleHelper
                     ReportHospitals.Add(hospital);
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void ListHospitalsReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -865,7 +928,13 @@ namespace LenkasLittleHelper
             string sql = @$"DELETE
                       FROM REPORT_HOSPITALS
                     WHERE ID_REPORT_HOSPITAL = {hospital.IdReportHospital}";
-            DBHelper.DoCommand(sql);
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDlg(error);
+                return;
+            }
 
             ReportHospitals.Remove(hospital);
             LoadCitiesCount();
@@ -894,7 +963,7 @@ namespace LenkasLittleHelper
                             WHERE RD.ID_REPORT_HOSPITAL = {hospital.IdReportHospital}
                             ORDER BY ID_REPORT_DOCTOR DESC";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -908,6 +977,11 @@ namespace LenkasLittleHelper
                     ReportDoctors.Add(new Doctor_Report(idReportDoctor, idDoctor, fullName, nameSpeciality, street, buildNumber));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDlg(error);
+            }
 
             hospital.UpdateCounter(ReportDoctors.Count);
         }
@@ -984,7 +1058,7 @@ namespace LenkasLittleHelper
                 ON RP.ID_PHARMACY = P.ID_PHARMACY
             WHERE RP.ID_REPORT_CITY = {idReportCity}";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -997,6 +1071,11 @@ namespace LenkasLittleHelper
                     ReportPharmacies.Add(new PharmacyReport(idReportPharmacy, idPharmacy, namePharmacy, street, build));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void Btn_AddPharmacy_Click(object sender, RoutedEventArgs e)
@@ -1025,7 +1104,12 @@ namespace LenkasLittleHelper
 
             string sql = $"DELETE FROM REPORT_PHARMACIES WHERE ID_REPORT_PHARMACY={pharmacyReport.IdReportPharmacy}";
 
-            DBHelper.DoCommand(sql);
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
 
             LoadPharmacies(city.IdReportCity);
 

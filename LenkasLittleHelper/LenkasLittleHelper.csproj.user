@@ -15,16 +15,19 @@
     <Compile Update="Windows\Directories\AddEditPharmacy.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Windows\Directories\AddEditSpeciality.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Windows\Directories\Cities.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Windows\Directories\HospitalsAndDoctors.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Windows\Directories\WindowPharmacies.xaml.cs">
+    <Compile Update="Windows\Directories\Specialities.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Directories_old.xaml.cs">
+    <Compile Update="Windows\Directories\WindowPharmacies.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Windows\Directories\Directory.xaml.cs">
@@ -62,10 +65,10 @@
     <Page Update="Windows\Directories\AddEditCity.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="_Directories.xaml">
+    <Page Update="Windows\Directories\AddEditPharmacy.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Windows\Directories\AddEditPharmacy.xaml">
+    <Page Update="Windows\Directories\AddEditSpeciality.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Windows\Directories\Cities.xaml">
@@ -81,6 +84,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Windows\Directories\EditHospital.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\Directories\Specialities.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Windows\Directories\WindowPharmacies.xaml">

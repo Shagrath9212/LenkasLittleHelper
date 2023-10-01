@@ -40,6 +40,11 @@ namespace LenkasLittleHelper
                     Cities.Add(new City(idCity, city));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void City_Save_Click(object _, RoutedEventArgs __)
@@ -54,7 +59,13 @@ namespace LenkasLittleHelper
             string sql = $@"INSERT INTO REPORT_CITIES (ID_REPORT_DAY, ID_CITY)
                     VALUES ({IdDayReport}, {selectedCity.Id})";
 
-            DBHelper.DoCommand(sql);
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
+
             Close();
         }
     }

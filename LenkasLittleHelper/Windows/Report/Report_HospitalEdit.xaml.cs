@@ -31,7 +31,7 @@ namespace LenkasLittleHelper
             string sql = $"SELECT ID_HOSPITAL, TITLE FROM HOSPITALS WHERE ID_CITY={IDCity} " +
                 $"AND ID_HOSPITAL NOT IN ({string.Join(',', alreadyAdded)})";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -40,6 +40,11 @@ namespace LenkasLittleHelper
                     Hospitals.Add(new Hospital(idHospital, hospitalName));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void HospitalSave_Click(object sender, RoutedEventArgs e)
@@ -52,7 +57,14 @@ namespace LenkasLittleHelper
             string sql = @$"INSERT INTO REPORT_HOSPITALS (ID_REPORT_CITY,ID_HOSPITAL) 
                             VALUES ({IDReportCity},{selectedHospital.IdHospital})";
 
-            DBHelper.DoCommand(sql);
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+                return;
+            }
+
             Close();
         }
     }

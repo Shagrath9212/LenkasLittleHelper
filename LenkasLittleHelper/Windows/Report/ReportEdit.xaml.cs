@@ -22,8 +22,13 @@ namespace LenkasLittleHelper
                 {"dt",DateTime.Now.Ticks}
             };
 
-            DBHelper.DoCommand(sql, cmdParams);
-            
+            var error = DBHelper.DoCommand(sql, cmdParams);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
+
             Close();
         }
     }

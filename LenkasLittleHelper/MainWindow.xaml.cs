@@ -19,8 +19,6 @@ namespace LenkasLittleHelper
         {
             var directory = new Directories.Directory();
             directory.Show();
-            //var directoriesPage = new Directories_old();
-            //directoriesPage.Show();
         }
 
         private void Btn_Reports_Click(object sender, RoutedEventArgs e)

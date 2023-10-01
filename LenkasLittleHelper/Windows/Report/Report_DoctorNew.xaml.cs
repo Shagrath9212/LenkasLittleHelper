@@ -55,6 +55,11 @@ namespace LenkasLittleHelper
                     Doctors.Add(new Doctor(idDoctor, fullName, speciality, street, builNumber));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void ListDoctors_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -97,8 +102,13 @@ namespace LenkasLittleHelper
             {
                 string sql = $@"INSERT INTO REPORT_DOCTORS (ID_REPORT_HOSPITAL,ID_DOCTOR) 
                             VALUES ({IdReportHospital},{doctor.IdDoctor})";
-                
-                DBHelper.DoCommand(sql);
+
+                var error = DBHelper.DoCommand(sql);
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    MainEnv.ShowErrorDlg(error);
+                }
             }
 
             Close();

@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LenkasLittleHelper.Windows.Directories"
         mc:Ignorable="d"
-        Title="Cities" Height="450" Width="550">
+        Title="Перелік міст" Height="450" Width="550">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="9*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0">
-            <Button Content="Додати місто..." x:Name="Btn_Add_City" Click="Btn_Add_EditCity_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
+            <Button Content="Додати місто..." x:Name="Btn_Add_City" Click="Btn_Add_City_Click" VerticalAlignment="Top" Grid.Row="0" Margin="5,5"/>
             <Button Content="Редагувати..." x:Name="Btn_EditCity" Click="Btn_Add_EditCity_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
             <Button Content="У архів" x:Name="Btn_ArchiveCity" Click="Btn_ArchiveCity_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="0" Margin="5,5" IsEnabled="False"/>
             <CheckBox Content="Показати архівні" x:Name="ShowArch_Cities" Checked="ShowArch_Cities_Checked" Unchecked="ShowArch_Cities_Checked" Margin="0,8"></CheckBox>

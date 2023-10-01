@@ -43,7 +43,7 @@ namespace LenkasLittleHelper.Directories
 
             if (!ShowArch.IsChecked ?? false)
             {
-                sqlHospitals.Append(" WHERE H.IS_ARCHIVED=0 AND C.IS_ARCHIVED=0");
+                sqlHospitals.Append(" WHERE H.IS_ARCHIVED=0 AND C.IS_ARCHIVED=0 ");
             }
 
             sqlHospitals.Append("ORDER BY H.IS_ARCHIVED, C.TITLE");
@@ -120,7 +120,8 @@ namespace LenkasLittleHelper.Directories
                                   AD.STREET,
                                   AD.BUILD_NUMBER,
                                   CT.TITLE CATEGORY,
-                                  D.VISITABLE
+                                  D.VISITABLE,
+                                  D.IS_ARCHIVED
                                 FROM DOCTORS D
                                   LEFT JOIN ADDRESSES AD
                                     ON D.ID_ADDRESS = AD.ID_ADDRESS
@@ -132,31 +133,14 @@ namespace LenkasLittleHelper.Directories
                                     ON AD.ID_HOSPITAL = H.ID_HOSPITAL
                                   LEFT JOIN CITIES C
                                     ON H.ID_CITY = C.ID_CITY
-                                   WHERE AD.ID_HOSPITAL = {hospital.IdHospital} 
-                                  ORDER BY C.TITLE";
+                                   WHERE AD.ID_HOSPITAL = {hospital.IdHospital} ";
 
-                //sqlDoctors = $@"SELECT
-                //  D.ID_DOCTOR,
-                //  D.SPECIALITY,
-                //  D.ID_ADDRESS,
-                //  NULL CITY,
-                //  NULL NAME_HOSPITAL,
-                //  D.ID_CATEGORY,
-                //  S.NAME_SPECIALITY,
-                //  D.PHONE_NUM,
-                //  D.FULL_NAME,
-                //  AD.STREET,
-                //  AD.BUILD_NUMBER,
-                //  CT.TITLE CATEGORY,
-                //  D.VISITABLE
-                //FROM DOCTORS D
-                //  LEFT JOIN ADDRESSES AD
-                //    ON D.ID_ADDRESS = AD.ID_ADDRESS
-                //  LEFT JOIN SPECIALITIES S
-                //    ON D.SPECIALITY = S.ID_SPECIALITY
-                //  LEFT JOIN CATEGORIES CT
-                //    ON D.ID_CATEGORY = CT.ID_CATEGORY
-                //WHERE AD.ID_HOSPITAL = {hospital.IdHospital}";
+                if (!ShowArch_Doctors.IsChecked.HasValue || !ShowArch_Doctors.IsChecked.Value)
+                {
+                    sqlDoctors += @"AND D.IS_ARCHIVED=0 ";
+                }
+
+                sqlDoctors += "ORDER BY C.TITLE";
             }
             else
             {
@@ -176,7 +160,8 @@ namespace LenkasLittleHelper.Directories
                                   AD.STREET,
                                   AD.BUILD_NUMBER,
                                   CT.TITLE CATEGORY,
-                                  D.VISITABLE
+                                  D.VISITABLE,
+                                  D.IS_ARCHIVED
                                 FROM DOCTORS D
                                   LEFT JOIN ADDRESSES AD
                                     ON D.ID_ADDRESS = AD.ID_ADDRESS
@@ -187,8 +172,14 @@ namespace LenkasLittleHelper.Directories
                                   LEFT JOIN HOSPITALS H
                                     ON AD.ID_HOSPITAL = H.ID_HOSPITAL
                                   LEFT JOIN CITIES C
-                                    ON H.ID_CITY = C.ID_CITY
-                                  ORDER BY C.TITLE";
+                                    ON H.ID_CITY = C.ID_CITY ";
+
+                if (!ShowArch_Doctors.IsChecked.HasValue || !ShowArch_Doctors.IsChecked.Value)
+                {
+                    sqlDoctors += @"AND D.IS_ARCHIVED=0 ";
+                }
+
+                sqlDoctors += "ORDER BY C.TITLE";
             }
 
             var error = DBHelper.ExecuteReader(sqlDoctors, e =>
@@ -209,8 +200,9 @@ namespace LenkasLittleHelper.Directories
                     int idSpecialiity = e.GetValueOrDefault<int>("SPECIALITY");
                     int idAddress = e.GetValueOrDefault<int>("ID_ADDRESS");
                     int idCategory = e.GetValueOrDefault<int>("ID_CATEGORY");
+                    bool isArchived = e.GetValueOrDefault<bool>("IS_ARCHIVED");
 
-                    Doctors.Add(new Doctor_Directory(idDoctor, fullName, speciality, phoneNum, street, buildNumber, category, visitable, idSpecialiity, idCategory, idAddress, city, nameHospital));
+                    Doctors.Add(new Doctor_Directory(idDoctor, fullName, speciality, phoneNum, street, buildNumber, category, visitable, idSpecialiity, idCategory, idAddress, city, nameHospital, isArchived));
                 }
             });
         }
@@ -281,7 +273,12 @@ namespace LenkasLittleHelper.Directories
 
             string sql = $"UPDATE HOSPITALS SET IS_ARCHIVED={Convert.ToInt32(!hospital.IsArchived)} WHERE ID_HOSPITAL={hospital.IdHospital}";
 
-            DBHelper.DoCommand(sql);
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
 
             InitHospitals();
         }
@@ -298,7 +295,21 @@ namespace LenkasLittleHelper.Directories
 
         private void DoArchiveDoctor_Click(object sender, RoutedEventArgs e)
         {
+            if (ListDoctors.SelectedItem is not Doctor_Directory doctor)
+            {
+                return;
+            }
 
+            string sql = $"UPDATE DOCTORS SET IS_ARCHIVED={Convert.ToInt32(!doctor.IsArchived)} WHERE ID_DOCTOR={doctor.IdDoctor}";
+
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
+
+            InitDoctors();
         }
 
         private void Btn_Add_Doctor_Click(object sender, RoutedEventArgs e)

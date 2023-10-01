@@ -35,7 +35,9 @@ namespace LenkasLittleHelper.Windows.Directories
                 sql += "WHERE IS_ARCHIVED=0";
             }
 
-            DBHelper.ExecuteReader(sql, e =>
+            sql += " ORDER BY TITLE";
+
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -46,6 +48,11 @@ namespace LenkasLittleHelper.Windows.Directories
                     Cities_Src.Add(new City_Directory(idCity, title, isArchived));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void ListCities_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -65,16 +72,12 @@ namespace LenkasLittleHelper.Windows.Directories
 
         private void Btn_Add_EditCity_Click(object sender, RoutedEventArgs e)
         {
-            AddEditCity? wndCity = null;
+            if (ListCities.SelectedItem is not City_Directory city)
+            {
+                return;
+            }
 
-            if (ListCities.SelectedItem is City_Directory city)
-            {
-                wndCity = new AddEditCity(city);
-            }
-            else
-            {
-                wndCity = new AddEditCity();
-            }
+            var wndCity = new AddEditCity(city);
 
             wndCity.Show();
 
@@ -94,7 +97,13 @@ namespace LenkasLittleHelper.Windows.Directories
             string sql = $@"UPDATE CITIES SET IS_ARCHIVED={Convert.ToInt32(!city.IsArchived)} 
                             WHERE ID_CITY={city.Id}";
 
-            DBHelper.DoCommand(sql);
+            var error = DBHelper.DoCommand(sql);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
+
             LoadCities();
         }
 
@@ -117,6 +126,18 @@ namespace LenkasLittleHelper.Windows.Directories
         private void ShowArch_Cities_Checked(object sender, RoutedEventArgs e)
         {
             LoadCities();
+        }
+
+        private void Btn_Add_City_Click(object sender, RoutedEventArgs e)
+        {
+            var wndCity = new AddEditCity();
+
+            wndCity.Show();
+
+            wndCity.Closed += (s, e) =>
+            {
+                LoadCities();
+            };
         }
     }
 }

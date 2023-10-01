@@ -14,7 +14,7 @@ namespace LenkasLittleHelper
     public partial class Directory_AddEditDoctor : Window
     {
         private readonly ObservableCollection<Address> Addresses = new();
-        private readonly ObservableCollection<ReportSpeciality> Specialities = new();
+        private readonly ObservableCollection<Speciality> Specialities = new();
         private readonly ObservableCollection<ReportCategory> Categories = new();
 
         private readonly int IdHospital;
@@ -64,7 +64,7 @@ namespace LenkasLittleHelper
                 FROM ADDRESSES
                 WHERE ID_HOSPITAL = {IdHospital}";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -75,6 +75,11 @@ namespace LenkasLittleHelper
                     Addresses.Add(new Address(idAddress, street, build));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void InitSpecialities()
@@ -85,18 +90,24 @@ namespace LenkasLittleHelper
                   ID_SPECIALITY,
                   NAME_SPECIALITY
                 FROM SPECIALITIES
+                  WHERE IS_ARCHIVED=0 
                     ORDER BY NAME_SPECIALITY";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
                     int idSpeciality = e.GetValueOrDefault<int>("ID_SPECIALITY");
                     string? name = e.GetValueOrDefault<string>("NAME_SPECIALITY");
 
-                    Specialities.Add(new ReportSpeciality(idSpeciality, name));
+                    Specialities.Add(new Speciality(idSpeciality, name));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void InitCategories()
@@ -109,7 +120,7 @@ namespace LenkasLittleHelper
                         FROM CATEGORIES
                         ORDER BY TITLE";
 
-            DBHelper.ExecuteReader(sql, e =>
+            var error = DBHelper.ExecuteReader(sql, e =>
             {
                 while (e.Read())
                 {
@@ -119,6 +130,11 @@ namespace LenkasLittleHelper
                     Categories.Add(new ReportCategory(idCategory, title));
                 }
             });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                MainEnv.ShowErrorDlg(error);
+            }
         }
 
         private void InitPickers()
@@ -148,7 +164,7 @@ namespace LenkasLittleHelper
 
             foreach (var speciality in ListSpecialities.ItemsSource)
             {
-                if (speciality is not ReportSpeciality _speciality)
+                if (speciality is not Speciality _speciality)
                 {
                     continue;
                 }
@@ -193,7 +209,7 @@ namespace LenkasLittleHelper
                 idCategory = rc.IdCategory;
             }
 
-            if (ListSpecialities.SelectedItem is ReportSpeciality rs)
+            if (ListSpecialities.SelectedItem is Speciality rs)
             {
                 idSpeciality = rs.IdSpeciality;
             }
@@ -225,7 +241,7 @@ namespace LenkasLittleHelper
 
                     if (!string.IsNullOrEmpty(error))
                     {
-                        MessageBox.Show(error, "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MainEnv.ShowErrorDlg(error);
                         return;
                     }
 
@@ -240,8 +256,7 @@ namespace LenkasLittleHelper
 
                     if (!string.IsNullOrEmpty(error))
                     {
-                        MessageBox.Show(error, "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
+                        MainEnv.ShowErrorDlg(error);
                     }
                 }
                 else
@@ -290,6 +305,12 @@ namespace LenkasLittleHelper
                 }
             }
             #endregion
+
+            if (idSpeciality == -1)
+            {
+                MessageBox.Show("Не вказано спеціальність лікаря!", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             var cmdParams = new Dictionary<string, object>()
             {

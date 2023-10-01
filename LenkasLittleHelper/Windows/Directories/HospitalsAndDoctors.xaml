@@ -63,6 +63,19 @@
                 </StackPanel>
             </StackPanel>
             <ListView x:Name="ListDoctors" SelectionChanged="ListDoctors_SelectionChanged" Height="Auto" Grid.Row="1">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="BorderBrush" Value="LightGray" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsArchived}"
+        Value="True">
+                                <Setter Property="Background"
+        Value="LightGray" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
                 <ListView.View>
 
                     <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Перелік лікарів">
@@ -71,13 +84,13 @@
 
                         <GridViewColumn x:Name="ColHospital" DisplayMemberBinding="{Binding Path=NameHospital}" Width="0" Header="Лікарня"/>
 
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=FullName}" Header="ПІП" Width="Auto"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=FullName}" Header="ПІП" Width="100"/>
 
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Address}" Header="Адреса" Width="Auto"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Address}" Header="Адреса" Width="100"/>
 
                         <GridViewColumn DisplayMemberBinding="{Binding Path=PhoneNum}" Header="Номер телефону" Width="Auto"/>
 
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Speciality}" Header="Спеціальність" Width="Auto"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Speciality}" Header="Спеціальність" Width="80"/>
 
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Category}" Header="Категорія" Width="Auto"/>
 
