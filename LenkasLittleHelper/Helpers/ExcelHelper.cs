@@ -9,18 +9,26 @@ namespace LenkasLittleHelper.Helpers
         {
             if (!File.Exists(path))
             {
-                return null;
+                MainEnv.ShowErrorDlg($"Відсутній файл template.xlsx ({path})");
             }
 
-            using (var stream = File.OpenRead(path))
+            try
             {
-                return new ExcelDocument(stream);
+                using (var stream = File.OpenRead(path))
+                {
+                    return new ExcelDocument(stream);
+                }
             }
+            catch (System.Exception)
+            {
+                MainEnv.ShowErrorDlg("Помилка при відкритті шаблону. Закрий файл template.xlsx, та спробуй знову.");
+            }
+            return null;
         }
 
         private ExcelDocument(Stream stream) : base(stream)
         {
-            
+
         }
 
         private ExcelDocument() : base()
