@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace LenkasLittleHelper.Models
 {
-    public class ReportDay
+    public class ReportDay : VM_WithNotify
     {
-        private static Dictionary<DayOfWeek, string> DaysOfWeek = new()
+        private static readonly Dictionary<DayOfWeek, string> DaysOfWeek = new()
         {
             {DayOfWeek.Sunday,"Неділя" },
             {DayOfWeek.Monday,"Понеділок" },
@@ -19,6 +19,19 @@ namespace LenkasLittleHelper.Models
 
         public int IdReportDay { get; }
         public DateTime Day { get; }
+
+        public int CntDoctors { get => cntDoctors; private set => SetProperty(ref cntDoctors, value); }
+        public int cntDoctors;
+
+        public int CntPharmacies { get => cntPharmacies; private set => SetProperty(ref cntPharmacies, value); }
+        public int cntPharmacies;
+
+        public void UpdateCounter(int countDoctors, int countPharmacies)
+        {
+            CntDoctors = countDoctors;
+            CntPharmacies = countPharmacies;
+        }
+
         public string ReportDate_Str
         {
             get
@@ -33,6 +46,7 @@ namespace LenkasLittleHelper.Models
                 return DaysOfWeek[Day.DayOfWeek];
             }
         }
+
         public ReportDay(int idReportDay, DateTime day)
         {
             IdReportDay = idReportDay;

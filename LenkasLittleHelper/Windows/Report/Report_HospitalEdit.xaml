@@ -14,6 +14,7 @@
         <StackPanel Margin="10" Grid.Row="0">
             <Label Content="Назва закладу"/>
             <ComboBox x:Name="ListHospitals"
+                      SelectedIndex="0"
         DisplayMemberPath="Title"
         SelectedValuePath="Title"/>
         </StackPanel>

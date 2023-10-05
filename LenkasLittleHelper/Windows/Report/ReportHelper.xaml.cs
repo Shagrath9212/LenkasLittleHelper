@@ -128,6 +128,82 @@ namespace LenkasLittleHelper
             }
         }
 
+        private void RefreshDailyCounters()
+        {
+            if (ListReports.SelectedItem is not Report report)
+            {
+                return;
+            }
+            string sql = @$"SELECT 
+                      RD.ID_REPORT_DAY, 
+                      (
+                        SELECT 
+                          COUNT(1) 
+                        FROM 
+                          REPORT_DOCTORS RDO 
+                          LEFT JOIN REPORT_HOSPITALS RH ON RDO.ID_REPORT_HOSPITAL = RH.ID_REPORT_HOSPITAL 
+                          LEFT JOIN REPORT_CITIES RC ON RH.ID_REPORT_CITY = RC.ID_REPORT_CITY 
+                        WHERE 
+                          RC.ID_REPORT_DAY = RD.ID_REPORT_DAY
+                      ) CNT_DOCTORS, 
+                      (
+                        SELECT 
+                          COUNT(1) 
+                        FROM 
+                          REPORT_PHARMACIES RP 
+                          LEFT JOIN REPORT_CITIES RC1 ON RP.ID_REPORT_CITY = RC1.ID_REPORT_CITY 
+                        WHERE 
+                          RC1.ID_REPORT_DAY = RD.ID_REPORT_DAY
+                      ) CNT_PHARMACIES 
+                    FROM 
+                      REPORT_DAYS RD 
+                    WHERE 
+                      RD.ID_REPORT = {report.IdReport}";
+
+            //Key-IdReport. Value (кортеж) 1-кількість лікарів, 2-кількість аптек
+            Dictionary<int, (int, int)> counts = new();
+
+            var error = DBHelper.ExecuteReader(sql, e =>
+            {
+                while (e.Read())
+                {
+                    int idReportCity = e.GetValueOrDefault<int>("ID_REPORT_DAY");
+                    int countDoctors = e.GetValueOrDefault<int>("CNT_DOCTORS");
+                    int countPharmacies = e.GetValueOrDefault<int>("CNT_PHARMACIES");
+
+                    counts.TryAdd(idReportCity, (countDoctors, countPharmacies));
+                }
+            });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDlg(error);
+                return;
+            }
+
+            foreach (var day in ReportsDays)
+            {
+                if (!counts.TryGetValue(day.IdReportDay, out var counts_))
+                {
+                    day.UpdateCounter(0, 0);
+                    continue;
+                }
+
+                day.UpdateCounter(counts_.Item1, counts_.Item2);
+            }
+
+            foreach (var day in ReportsDays_Plan)
+            {
+                if (!counts.TryGetValue(day.IdReportDay, out var counts_))
+                {
+                    day.UpdateCounter(0, 0);
+                    continue;
+                }
+
+                day.UpdateCounter(counts_.Item1, counts_.Item2);
+            }
+        }
+
         private void Btn_AddReport_Click(object sender, RoutedEventArgs e)
         {
             var addNew = new ReportEdit();
@@ -157,6 +233,7 @@ namespace LenkasLittleHelper
 
             LoadDayReports_Fact(report.IdReport);
             LoadDayReports_Plan(report.IdReport);
+            RefreshDailyCounters();
         }
 
         private void Btn_MakeExcel_Click(object sender, RoutedEventArgs e)
@@ -670,7 +747,13 @@ namespace LenkasLittleHelper
         /// Оновлення кількості лікарів, аптек та лікарень напроти кожного міста зі звіту
         /// </summary>
         /// <param name="idReportDay">Ідентифікатор дня звіту</param>
-        private void LoadCitiesCount()
+        private void RefreshCounts()
+        {
+            RefreshCitiesCount();
+            RefreshDailyCounters();
+        }
+
+        private void RefreshCitiesCount()
         {
             int idReportDay = -1;
             if (ListDailyReports.SelectedItem is Models.ReportDay day)
@@ -731,6 +814,7 @@ namespace LenkasLittleHelper
                 if (!counts.TryGetValue(city.IdReportCity, out var counts_))
                 {
                     city.UpdateCounter(0, 0, 0);
+                    continue;
                 }
 
                 city.UpdateCounter(counts_.Item1, counts_.Item2, counts_.Item3);
@@ -793,7 +877,7 @@ namespace LenkasLittleHelper
                 MainEnv.ShowErrorDlg(error);
             }
 
-            LoadCitiesCount();
+            RefreshCounts();
         }
 
         private void ListCitiesReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -908,7 +992,7 @@ namespace LenkasLittleHelper
             hospitalEdit.Closed += (s, e) =>
             {
                 LoadHospitals(city.IdReportCity);
-                LoadCitiesCount();
+                RefreshCounts();
             };
         }
 
@@ -937,7 +1021,7 @@ namespace LenkasLittleHelper
             }
 
             ReportHospitals.Remove(hospital);
-            LoadCitiesCount();
+            RefreshCounts();
         }
         #endregion
 
@@ -984,6 +1068,8 @@ namespace LenkasLittleHelper
             }
 
             hospital.UpdateCounter(ReportDoctors.Count);
+
+            RefreshCounts();
         }
 
         private void Btn_AddDoctor_Click(object sender, RoutedEventArgs e)
@@ -999,7 +1085,7 @@ namespace LenkasLittleHelper
             reportEditDoctor.Closed += (s, e) =>
             {
                 LoadDoctors(hospital);
-                LoadCitiesCount();
+                RefreshCounts();
             };
         }
 
@@ -1028,6 +1114,8 @@ namespace LenkasLittleHelper
             }
 
             LoadDoctors(hospital);
+
+            RefreshCounts();
         }
 
         private void ListDoctorsReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1074,7 +1162,7 @@ namespace LenkasLittleHelper
 
             if (!string.IsNullOrEmpty(error))
             {
-                MainEnv.ShowErrorDlg(error);
+                ShowErrorDlg(error);
             }
         }
 
@@ -1085,13 +1173,13 @@ namespace LenkasLittleHelper
                 return;
             }
 
-            var addPharmacy = new Report_AddEditPharmacy(city.Id, city.IdReportCity, ReportPharmacies.Select(e => e.IdPharmacy));
+            var addPharmacy = new Report_AddEditPharmacy(city.Id, city.CityName, city.IdReportCity, ReportPharmacies.Select(e => e.IdPharmacy));
 
             addPharmacy.Show();
             addPharmacy.Closed += (s, e) =>
             {
                 LoadPharmacies(city.IdReportCity);
-                LoadCitiesCount();
+                RefreshCounts();
             };
         }
 
@@ -1108,12 +1196,12 @@ namespace LenkasLittleHelper
 
             if (!string.IsNullOrEmpty(error))
             {
-                MainEnv.ShowErrorDlg(error);
+                ShowErrorDlg(error);
             }
 
             LoadPharmacies(city.IdReportCity);
 
-            LoadCitiesCount();
+            RefreshCounts();
         }
         #endregion
     }

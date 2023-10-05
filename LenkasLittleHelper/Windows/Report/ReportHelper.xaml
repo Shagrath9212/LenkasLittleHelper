@@ -73,6 +73,8 @@
 
                                     <GridViewColumn DisplayMemberBinding="{Binding Path=ReportDate_Str}" Header="Дата" Width="Auto"/>
                                     <GridViewColumn DisplayMemberBinding="{Binding Path=ReportDate_DayOfWeek}" Header="День" Width="Auto"/>
+                                    <GridViewColumn DisplayMemberBinding="{Binding Path=CntDoctors}" Header="Лікарі" Width="50"/>
+                                    <GridViewColumn DisplayMemberBinding="{Binding Path=CntPharmacies}" Header="Аптеки" Width="50"/>
                                 </GridView>
                             </ListView.View>
                         </ListView>
@@ -98,6 +100,8 @@
 
                                     <GridViewColumn DisplayMemberBinding="{Binding Path=ReportDate_Str}" Header="Дата" Width="Auto"/>
                                     <GridViewColumn DisplayMemberBinding="{Binding Path=ReportDate_DayOfWeek}" Header="День" Width="Auto"/>
+                                    <GridViewColumn DisplayMemberBinding="{Binding Path=CntDoctors}" Header="Лікарі" Width="50"/>
+                                    <GridViewColumn DisplayMemberBinding="{Binding Path=CntPharmacies}" Header="Аптеки" Width="50"/>
                                 </GridView>
                             </ListView.View>
                         </ListView>

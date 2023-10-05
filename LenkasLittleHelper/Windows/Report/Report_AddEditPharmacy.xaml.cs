@@ -17,11 +17,12 @@ namespace LenkasLittleHelper.Windows.Report
 
         private readonly int IdReportCity;
 
-        public Report_AddEditPharmacy(int idCity, int idReportCity, IEnumerable<int> existing)
+        public Report_AddEditPharmacy(int idCity, string? nameCity, int idReportCity, IEnumerable<int> existing)
         {
             InitializeComponent();
             ListPharmacies.ItemsSource = Pharmacies;
             IdReportCity = idReportCity;
+            Title = $"Аптеки ({nameCity})";
             LoadPharmacies(idCity, existing);
         }
 
