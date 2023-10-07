@@ -219,44 +219,47 @@ namespace LenkasLittleHelper
             {
                 if (!string.IsNullOrEmpty(AddressCustom.Text) && !string.IsNullOrEmpty(BuildCustom.Text))
                 {
-                    if (Addresses.FirstOrDefault
-                    (e => !string.IsNullOrEmpty(e.Street) && e.Street.ToLower() == AddressCustom.Text.ToLower()
-                    && !string.IsNullOrEmpty(e.BuildNumber) && e.BuildNumber.ToLower() == BuildCustom.Text.ToLower()
-                    ) != null)
+                    var addr = Addresses.FirstOrDefault
+                    (e => !string.IsNullOrEmpty(e.Street) && e.Street.ToLower().Trim() == AddressCustom.Text.ToLower().Trim()
+                    && !string.IsNullOrEmpty(e.BuildNumber) && e.BuildNumber.ToLower().Trim() == BuildCustom.Text.ToLower().Trim()
+                    );
+
+                    if (addr != null)
                     {
-                        MessageBox.Show($"Адреса {AddressCustom.Text}, {BuildCustom.Text} уже існує у переліку адрес!", "Помилка!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
+                        idAddress = addr.IdAddress;
                     }
+                    else
+                    {
+                        string addAddressSql = "INSERT INTO ADDRESSES (ID_HOSPITAL, STREET, BUILD_NUMBER) VALUES (@idHospital, @street, @buildnum)";
 
-                    string addAddressSql = "INSERT INTO ADDRESSES (ID_HOSPITAL, STREET, BUILD_NUMBER) VALUES (@idHospital, @street, @buildnum)";
-
-                    var cmdParams_AddAddress = new Dictionary<string, object>()
+                        var cmdParams_AddAddress = new Dictionary<string, object>()
                         {
                             {"idHospital",IdHospital},
                             {"street",AddressCustom.Text},
                             {"buildnum",BuildCustom.Text}
                         };
 
-                    var error = DBHelper.DoCommand(addAddressSql, cmdParams_AddAddress);
+                        var error = DBHelper.DoCommand(addAddressSql, cmdParams_AddAddress);
 
-                    if (!string.IsNullOrEmpty(error))
-                    {
-                        MainEnv.ShowErrorDlg(error);
-                        return;
-                    }
-
-                    string getLastAddrIdSql = "SELECT ID_ADDRESS FROM ADDRESSES ORDER BY ID_ADDRESS DESC";
-                    error = DBHelper.ExecuteReader(getLastAddrIdSql, e =>
-                    {
-                        if (e.Read())
+                        if (!string.IsNullOrEmpty(error))
                         {
-                            idAddress = e.GetValueOrDefault<int>("ID_ADDRESS");
+                            MainEnv.ShowErrorDlg(error);
+                            return;
                         }
-                    });
 
-                    if (!string.IsNullOrEmpty(error))
-                    {
-                        MainEnv.ShowErrorDlg(error);
+                        string getLastAddrIdSql = "SELECT ID_ADDRESS FROM ADDRESSES ORDER BY ID_ADDRESS DESC";
+                        error = DBHelper.ExecuteReader(getLastAddrIdSql, e =>
+                        {
+                            if (e.Read())
+                            {
+                                idAddress = e.GetValueOrDefault<int>("ID_ADDRESS");
+                            }
+                        });
+
+                        if (!string.IsNullOrEmpty(error))
+                        {
+                            MainEnv.ShowErrorDlg(error);
+                        }
                     }
                 }
                 else
@@ -269,39 +272,41 @@ namespace LenkasLittleHelper
             #region Введена вручну спеціальність
             if (!string.IsNullOrEmpty(SpecialityCustom.Text))
             {
-                if (Specialities.FirstOrDefault
-                    (e => !string.IsNullOrEmpty(e.Name) && e.Name.ToLower() == SpecialityCustom.Text.ToLower()) != null)
+                var spec = Specialities.FirstOrDefault
+                    (e => !string.IsNullOrEmpty(e.Name) && e.Name.ToLower() == SpecialityCustom.Text.ToLower());
+                if (spec != null)
                 {
-                    MessageBox.Show($"Спеціальність {SpecialityCustom.Text} уже існує у переліку спеціальностей!", "Помилка!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    idSpeciality = spec.IdSpeciality;
                 }
+                else
+                {
+                    string addSpecSql = "INSERT INTO SPECIALITIES (NAME_SPECIALITY) VALUES (@nameSpeciality)";
 
-                string addSpecSql = "INSERT INTO SPECIALITIES (NAME_SPECIALITY) VALUES (@nameSpeciality)";
-
-                var cmdParams_AddSpec = new Dictionary<string, object>()
+                    var cmdParams_AddSpec = new Dictionary<string, object>()
                         {
                             {"nameSpeciality",SpecialityCustom.Text}
                         };
 
-                var error = DBHelper.DoCommand(addSpecSql, cmdParams_AddSpec);
+                    var error = DBHelper.DoCommand(addSpecSql, cmdParams_AddSpec);
 
-                if (!string.IsNullOrEmpty(error))
-                {
-                    MessageBox.Show(error, "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-
-                string getLastAddrIdSql = "SELECT ID_SPECIALITY FROM SPECIALITIES ORDER BY ID_SPECIALITY DESC";
-                error = DBHelper.ExecuteReader(getLastAddrIdSql, e =>
-                {
-                    if (e.Read())
+                    if (!string.IsNullOrEmpty(error))
                     {
-                        idSpeciality = e.GetValueOrDefault<int>("ID_SPECIALITY");
+                        MessageBox.Show(error, "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
-                });
 
-                if (!string.IsNullOrEmpty(error))
-                {
-                    MessageBox.Show(error, "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    string getLastAddrIdSql = "SELECT ID_SPECIALITY FROM SPECIALITIES ORDER BY ID_SPECIALITY DESC";
+                    error = DBHelper.ExecuteReader(getLastAddrIdSql, e =>
+                    {
+                        if (e.Read())
+                        {
+                            idSpeciality = e.GetValueOrDefault<int>("ID_SPECIALITY");
+                        }
+                    });
+
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        MessageBox.Show(error, "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                 }
             }
             #endregion
@@ -309,6 +314,12 @@ namespace LenkasLittleHelper
             if (idSpeciality == -1)
             {
                 MessageBox.Show("Не вказано спеціальність лікаря!", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(DoctorName.Text))
+            {
+                MessageBox.Show("Не вказано ПІБ лікаря!", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
