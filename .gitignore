@@ -1,3 +1,4 @@
 /.vs/
 *bin
 *obj
+/LenkasLittleHelper/LenkasLittleHelper.csproj.user

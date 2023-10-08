@@ -6,8 +6,9 @@
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<ApplicationIcon>medicine.ico</ApplicationIcon>
-		<!--<DebugType>None</DebugType>
-		<DebugSymbols>False</DebugSymbols>-->
+		<DebugType>None</DebugType>
+		<DebugSymbols>False</DebugSymbols>
+		<Version>1.0.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
